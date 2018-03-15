@@ -1,31 +1,29 @@
-package edu.fiit.schneider_plugin.extractor;
+package edu.fiit.schneider_plugin.comment_util;
 
 import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CommentExtractor {
     /**
      * Gets all comments from given psifile
      *
-     * @param psiFile                 psiFile to search from
-     * @param psiFileNodesCollections list of collections of comments from differenc parts of file
+     * @param psiFile psiFile to search from
      */
-    public static Collection<? extends PsiComment> getCommentsFromPsiFile(PsiFile psiFile,
-                                                                          List<Collection<? extends PsiComment>> psiFileNodesCollections) {
+    public static List<PsiComment> getCommentsFromPsiFile(PsiFile psiFile) {
 
+        List<Collection<? extends PsiComment>> psiFileNodesCollections = new ArrayList<>();
+        List<PsiComment> elementList = new LinkedList<>();
         Class<? extends PsiComment> list = PsiComment.class;
-        for (PsiElement element : psiFile.getChildren()) {
-            psiFileNodesCollections.add(PsiTreeUtil.findChildrenOfType(element, list));
-        }
+        psiFileNodesCollections.add(PsiTreeUtil.findChildrenOfType(psiFile.getFirstChild().getParent(),list));
 
-        Collection<? extends PsiComment> allComments;
-        allComments = flatten(psiFileNodesCollections);
+        List<PsiComment> allComments;
+        allComments = turnToList(flatten(psiFileNodesCollections));
         System.out.println();
         return allComments;
     }
@@ -36,5 +34,9 @@ public class CommentExtractor {
             newCollection.addAll(collection);
         }
         return newCollection;
+    }
+
+    private static List<PsiComment> turnToList(Collection<? extends PsiComment> collection){
+        return new LinkedList<>(collection);
     }
 }
