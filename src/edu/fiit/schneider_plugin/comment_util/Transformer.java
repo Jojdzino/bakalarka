@@ -2,17 +2,19 @@ package edu.fiit.schneider_plugin.comment_util;
 
 import com.intellij.psi.PsiComment;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 
 
-public class Merger {
+public class Transformer {
 
     /**
      * Puts together comments that are close nearby, next to each other etc. One line comments with code in the same line
-     * are left alone. All other comments that are " one big comment", like //comment\n//comment are put together into
-     * one list.
+     * are left alone(put into list alone). All other comments that are " one big comment", like "//comment\n//comment"
+     * are put together into one list
      *
      * @param allComments comments from single file
      * @return list of together listed comments
@@ -53,5 +55,27 @@ public class Merger {
         return mergedCommentLists;
     }
 
+    /**
+     * Transforms list of collections into one collection
+     * @param psiFileNodesCollections list of collection to be transformed
+     * @return one collection
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static Collection<? extends PsiComment> flatten(List<Collection<? extends PsiComment>> psiFileNodesCollections) {
+        Collection<PsiComment> newCollection = new ArrayList<>();
+        for (Collection<? extends PsiComment> collection : psiFileNodesCollections) {
+            newCollection.addAll(collection);
+        }
+        return newCollection;
+    }
 
+    /**
+     * Transforms collection into more usable list of comment
+     * @param collection collection to be transformed
+     * @return list of PsiComments
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static List<PsiComment> turnToList(Collection<? extends PsiComment> collection){
+        return new LinkedList<>(collection);
+    }
 }

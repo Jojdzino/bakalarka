@@ -11,7 +11,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
-import edu.fiit.schneider_plugin.comment_util.Merger;
+import edu.fiit.schneider_plugin.comment_util.Transformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +24,20 @@ public class FindComments extends AnAction {
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = anActionEvent.getRequiredData(CommonDataKeys.EDITOR);
         PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
+        System.out.println(psiFile != null ? psiFile.getLanguage().toString() : null);
 
-        List<PsiComment> allComments = Extractor.getCommentsFromPsiFile(psiFile);   //get list of all comments from file
+        List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);   //get list of all comments from file
+        if(allComments.size()==0)
+            return;
 
-        List<List<PsiComment>> mergedComments= Merger.mergeByPosition(allComments);
+        List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
         System.out.println();
         List<List<PsiElement>> commentTargets = new ArrayList<>();
         for(List<PsiComment> actualList : mergedComments){
             commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size()-1)));
         }
 
+        System.out.println();
     }
 
 

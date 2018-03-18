@@ -3,19 +3,27 @@ package edu.fiit.schneider_plugin.comment_util;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.impl.source.PsiJavaFileImpl;
+import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
+import com.intellij.psi.impl.source.tree.java.PsiForStatementImpl;
+import com.intellij.psi.impl.source.tree.java.PsiForeachStatementImpl;
 import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
 import com.intellij.psi.util.PsiTreeUtil;
+import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
 import java.util.*;
 
+
 public class Extractor {
+
+    private static short maxStatementsBoundTogether=(short) ConfigAccesser.getElement("max_statement_bound_together");
     /**
      * Gets all comments from given psifile
      *
      * @param psiFile psiFile to search from
      */
-    public static List<PsiComment> getCommentsFromPsiFile(PsiFile psiFile) {
+    public static List<PsiComment> extractCommentsFromPsiFile(PsiFile psiFile) {
 
         List<Collection<? extends PsiComment>> psiFileNodesCollections = new ArrayList<>();
         List<PsiComment> elementList = new LinkedList<>();
@@ -23,51 +31,20 @@ public class Extractor {
         psiFileNodesCollections.add(PsiTreeUtil.findChildrenOfType(psiFile.getFirstChild().getParent(),list));
 
         List<PsiComment> allComments;
-        allComments = turnToList(flatten(psiFileNodesCollections));
+        allComments = Transformer.turnToList(Transformer.flatten(psiFileNodesCollections));
         System.out.println();
         return allComments;
     }
 
-
-    /**
-     * Transforms list of collections into one collection
-     * @param psiFileNodesCollections
-     * @return one collection
-     */
-    private static Collection<? extends PsiComment> flatten(List<Collection<? extends PsiComment>> psiFileNodesCollections) {
-        Collection<PsiComment> newCollection = new ArrayList<>();
-        for (Collection<? extends PsiComment> collection : psiFileNodesCollections) {
-            newCollection.addAll(collection);
-        }
-        return newCollection;
-    }
-
-    /**
-     * Transforms collection into more usable list of comment
-     * @param collection
-     * @return list of PsiComments
-     */
-    private static List<PsiComment> turnToList(Collection<? extends PsiComment> collection){
-        return new LinkedList<>(collection);
-    }
-
-    public static List<PsiElement> getTarget(PsiComment startingComment){
-        return null;
-    }
-
-    public static List<PsiElement> getSingleLineTarget(PsiComment startingComment){
-        return null;
-    }
-
     @SuppressWarnings("WeakerAccess")
-    public static PsiElement getLastElement(PsiElement root){
+    public static PsiElement extractLastElement(PsiElement root){
         PsiElement actualElement = root;
 
         while(actualElement.getNextSibling()!=null){
             actualElement=actualElement.getNextSibling();
         }
         if(actualElement.getChildren().length!=0)
-            return getLastElement(actualElement.getLastChild());
+            return extractLastElement(actualElement.getLastChild());
         else return actualElement;
     }
 
@@ -77,11 +54,43 @@ public class Extractor {
      * @return list of PsiElements that are target of given PsiComment
      */
     public static List<PsiElement> extractTargets(PsiComment psiComment) {
-
-        if(Checker.checkIfCodeInLine(psiComment))
+        if (Checker.checkIfCodeInLine(psiComment))
             return Extractor.extractTargetFromBeforeComment(psiComment);
 
-        return null;
+        int actualMaxStatementBoundTogether=maxStatementsBoundTogether;
+        int realElementsCounter = 0; // User doesnt count for elements like 'SEMICOLON' and 'WHITESPACE'
+        PsiElement actualElement = psiComment.getNextSibling();
+        List<PsiElement> targetElements = new ArrayList<>();
+
+        //If comment describes method implementation
+        if(psiComment.getParent().getClass()== PsiMethodImpl.class) {
+            targetElements.add(psiComment.getParent());
+            return targetElements;
+        }
+
+        //Sets variable to make program look for only one element - Class
+        //TODO this might be unstable check for various types of java file content
+        //TODO like multiple classes in one file and classes with annotations etc...
+        if(psiComment.getParent().getClass() == PsiJavaFileImpl.class){
+            actualMaxStatementBoundTogether=1;
+        }
+
+        while (realElementsCounter != actualMaxStatementBoundTogether) {
+            if(actualElement==null)
+                break;
+            if (actualElement.getClass() != PsiWhiteSpaceImpl.class && actualElement.getClass() != PsiJavaTokenImpl.class)
+                realElementsCounter++;
+            targetElements.add(actualElement);
+
+            Class actualElementClass = actualElement.getClass();
+            //SPECIAL when targetting reaches for within counter it will  break - for is signifficant for code processing
+            if (actualElementClass == PsiForeachStatementImpl.class || actualElementClass == PsiForStatementImpl.class)
+                break;
+
+            actualElement = actualElement.getNextSibling();
+        }
+
+        return targetElements;
     }
 
     // I can return all prev elements till null, because i have confirmed that there is code in the same line
@@ -93,13 +102,13 @@ public class Extractor {
             codeElements.add(0,actual);
             actual=actual.getPrevSibling();
         }
-        if(!containsCode(codeElements))
-            return getSpecialTarget(codeElements,psiComment);
+        if(!Checker.checkIfContainsCode(codeElements))
+            return extractSpecialTarget(codeElements,psiComment);
         return codeElements;
     }
 
     // Treats to special cases like for() \n;//comment
-    private static List<PsiElement> getSpecialTarget(List<PsiElement> codeElements, PsiComment psiComment) {
+    private static List<PsiElement> extractSpecialTarget(List<PsiElement> codeElements, PsiComment psiComment) {
         PsiElement parentsParent = psiComment.getParent().getParent();
         List<PsiElement> returnList = new ArrayList<>();
 
@@ -111,16 +120,7 @@ public class Extractor {
         return returnList;
     }
 
-    private static boolean containsCode(List<PsiElement> codeElements) {
-        for (PsiElement element : codeElements) {
-            Class c = element.getClass();
-            //noinspection StatementWithEmptyBody
-            if (c == PsiJavaTokenImpl.class || c== PsiWhiteSpaceImpl.class) {
-            }
-            else return true;
-        }
-        return false;
-    }
+
 
 
 }

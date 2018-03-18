@@ -42,11 +42,17 @@ public class ConfigAccesser {
     }
 
     //Returns value of selected element or -1 if element is missing
-    public static int getElement(String elementName) throws IOException, JDOMException{
+    public static int getElement(String elementName){
         SAXBuilder builder = new SAXBuilder();
         String projectPath=project.getBaseDir().getPath();
         File xmlFile = new File(projectPath + "/.idea/commentFixerConfig.xml");
-        Document doc = builder.build(xmlFile);
+        Document doc = null;
+        try {
+            doc = builder.build(xmlFile);
+        } catch (JDOMException | IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
         Element root = doc.getRootElement();
 
         for(Element child : root.getChildren()){
