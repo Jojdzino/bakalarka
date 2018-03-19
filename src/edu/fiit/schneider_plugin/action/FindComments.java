@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
+import entity.CommentTarget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +32,28 @@ public class FindComments extends AnAction {
             return;
 
         List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
-        System.out.println();
-        List<List<PsiElement>> commentTargets = new ArrayList<>();
+
+        List<List<PsiElement>> commentTargets = new ArrayList<>();// SPECIAL might contain array and linked lists, because one method insert at index 1 - better linked list
         for(List<PsiComment> actualList : mergedComments){
             commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size()-1)));
         }
 
+        //---------------------EXTRACTION COMPLETED------------------------ -> SPECIFICATION OF COMMENTS
+
+        int counter = 0;
+        List<List<PsiElement>> qualityComments  = new ArrayList<>();//Used to store comments that target method, class or variable decl.
+        List<List<PsiElement>> quantityComments = new ArrayList<>();//Used to store all other comments
+        List<Integer> resultSpecificationList   = new ArrayList<>();// Contains result for each list of comments
+        List<CommentTarget> pair                = new ArrayList<>();
+        for(List<PsiElement> list:commentTargets){
+            int result = Extractor.targetSpecifier(list);
+            resultSpecificationList.add(result);
+            if(result >=1 && result <=3){
+                qualityComments.add(list);
+                pair.add(new CommentTarget(mergedComments.get(counter),list,result));
+            }
+            counter++;
+        }
         System.out.println();
     }
 

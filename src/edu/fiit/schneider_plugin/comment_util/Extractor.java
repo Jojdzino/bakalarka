@@ -3,6 +3,8 @@ package edu.fiit.schneider_plugin.comment_util;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.impl.source.PsiClassImpl;
+import com.intellij.psi.impl.source.PsiFieldImpl;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
@@ -55,7 +57,7 @@ public class Extractor {
      */
     public static List<PsiElement> extractTargets(PsiComment psiComment) {
         if (Checker.checkIfCodeInLine(psiComment))
-            return Extractor.extractTargetFromBeforeComment(psiComment);
+            return Extractor.extractTargetFromBeforeCommentByParent(psiComment);
 
         int actualMaxStatementBoundTogether=maxStatementsBoundTogether;
         int realElementsCounter = 0; // User doesnt count for elements like 'SEMICOLON' and 'WHITESPACE'
@@ -63,7 +65,9 @@ public class Extractor {
         List<PsiElement> targetElements = new ArrayList<>();
 
         //If comment describes method implementation
-        if(psiComment.getParent().getClass()== PsiMethodImpl.class) {
+        //If comment describes class declaration
+        if(psiComment.getParent().getClass()== PsiMethodImpl.class ||
+                psiComment.getParent().getClass() ==PsiClassImpl.class) {
             targetElements.add(psiComment.getParent());
             return targetElements;
         }
@@ -78,8 +82,13 @@ public class Extractor {
         while (realElementsCounter != actualMaxStatementBoundTogether) {
             if(actualElement==null)
                 break;
+            //Block of code has ended
+            if(actualElement.getClass() == PsiWhiteSpaceImpl.class && actualElement.getText().contains("\n"))
+                break;
+
             if (actualElement.getClass() != PsiWhiteSpaceImpl.class && actualElement.getClass() != PsiJavaTokenImpl.class)
                 realElementsCounter++;
+
             targetElements.add(actualElement);
 
             Class actualElementClass = actualElement.getClass();
@@ -94,18 +103,12 @@ public class Extractor {
     }
 
     // I can return all prev elements till null, because i have confirmed that there is code in the same line
-    private static List<PsiElement> extractTargetFromBeforeComment(PsiComment psiComment) {
+    private static List<PsiElement> extractTargetFromBeforeCommentByParent(PsiComment psiComment){
         List<PsiElement> codeElements = new LinkedList<>();
-        PsiElement actual = psiComment.getPrevSibling();
-
-        while(actual!=null){
-            codeElements.add(0,actual);
-            actual=actual.getPrevSibling();
-        }
-        if(!Checker.checkIfContainsCode(codeElements))
-            return extractSpecialTarget(codeElements,psiComment);
+        PsiElement[] array = psiComment.getParent().getChildren();
+        codeElements.addAll(Arrays.asList(array).subList(0, array.length - 1));
         return codeElements;
-    }
+     }
 
     // Treats to special cases like for() \n;//comment
     private static List<PsiElement> extractSpecialTarget(List<PsiElement> codeElements, PsiComment psiComment) {
@@ -120,6 +123,21 @@ public class Extractor {
         return returnList;
     }
 
+    /**
+     * Identifies target based on list of targets
+     * @return -1 if target is quantity, 1 for class, 2 for method, 3 for variable
+     */
+    public static int targetSpecifier(List<PsiElement> targets) {
+
+        for (PsiElement actual : targets) {
+            if (actual.getClass() == PsiClassImpl.class) return 1;
+            if (actual.getClass() == PsiMethodImpl.class) return 2;
+            if (actual.getClass() == PsiFieldImpl.class ||
+                    actual.getParent().getClass() == PsiFieldImpl.class) return 3;
+        }
+
+        return -1;
+    }
 
 
 
