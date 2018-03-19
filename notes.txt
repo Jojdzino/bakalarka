@@ -1,0 +1,38 @@
+Projekt zatial najde komentare.
+Rozdeli si ich do skupiniek, v zmysle ze ich pospaja ked su napr dva // komentare pod sebou
+Nasledne im priradi targety, podla cisla ktore user zada. - SPECIAL case for a foreach
+Mam skopirovany kod na zistenie riadku urciteho elementu - to budem pouzivat na highlightovanie.
+
+TODO
+Treba zistit ci komentar targetuje metodu alebo triedu alebo premennu... Ak ano ziskat si meno metody alebo triedy rozparsovat a postvat na to lematizer
+Podla zisteni vyhodnotit, spravit si nejake rovnice na vyhodnotenie - 19 marec
+
+Ak komentar neobsahuje target ako kod, len nejake BRACET a whitespace tak bude akoze na zmazanie - 19 marec
+
+Ak komentar targetuje vacsiu strikturu a popisuje ju len velmi kratko tak dat k nemu akoze moznost ze extrahovat do metody - 20 marec
+
+Highlightovanie zlych komentarov a targetov  - 20 marec
+
+OTAZKY NA KAJA:
+
+Ci nema nejake info ako spravit take nieco co robi intelij ako alt enter a vyskoci ze safe delete.
+Nieco take by som chcel spravit pre redundantne komentare, ktore nemaju target. Zaroven by som to spravil aj pre zakomentovany kod.
+
+19.3.
+Rozdelim si komentare a targety tak ze niektore targetuju podla mena napr targetuju deklaraciu variabilnej alebo classu alebo metodu
+- Tieto mozem spravit tak potom ze zoberiem si text koemntarov, zoberiem si text mena tejto deklarovanej veci.
+A poslem na ne lematizer a potom levensteina. Uvidim co mi to spravi.
+
+PsiClassImpl ,PsiMethodImpl,Psifield
+
+PsiField - pridavanie do listu slov : vsetky - PsiModifierListImpl,PsiTypeElementImpl,PsiIdentifierImpl(meno)
+- Najprv sa pozriem na porodbnost listu slov z PsiIdentifierImpl a  z listu slov z komentaru
+ 1. Ak bude vysoka automaticky to oznacim
+ 2. Ak nebude vysoka, ale bude nad urcite percento, pridam do listu slov aj slova z PsiModifierListImpl,PsiTypeElementImpl a porovnam znovu
+    1. Ak bude vysoka oznacim
+    2. Ak nebude vysoka neoznacim
+
+
+
+Ine targetuju proste isty pcoet statementov.
+
