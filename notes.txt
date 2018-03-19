@@ -34,5 +34,9 @@ PsiField - pridavanie do listu slov : vsetky - PsiModifierListImpl,PsiTypeElemen
 
 
 
-Ine targetuju proste isty pcoet statementov.
+Ok aktualne mam dvojicu comment a targetv strukture CommentTarget, obsahuju rozne premenne. Mam pouzity lemmatizer
+chcel by som zajtra spravit pouzitie toho levensteina a aspon zobrazovat komentare ktore maju podobnost niziu ako urcite percento.
+To by som zajtra mohol spravit + pozret butd putvt ako tam robil to zafarbovanie, reps pozret si ako sa robi to safedelete.
+Ak toho spravim dost tak buduci tyzdne by som to realne co som planoval mohol mat hotove. Cize rovno sa teraz spytat
+co mal kajo v umysle spravit este. Lebo tato vec ma asi neudrzi moc dlho, neni toho malo ale pomalicky to kodim.
 
