@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
-import entity.CommentTarget;
+import edu.fiit.schneider_plugin.entity.CommentTarget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +52,11 @@ public class FindComments extends AnAction {
                 qualityComments.add(list);
                 pair.add(new CommentTarget(mergedComments.get(counter),list,result));
             }
+            else quantityComments.add(list);
             counter++;
         }
         System.out.println();
+
     }
 
 

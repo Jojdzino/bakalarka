@@ -1,4 +1,4 @@
-package entity;
+package edu.fiit.schneider_plugin.entity;
 
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
@@ -7,6 +7,7 @@ import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.impl.source.PsiModifierListImpl;
 import com.intellij.psi.impl.source.PsiTypeElementImpl;
 import com.intellij.psi.impl.source.tree.java.PsiIdentifierImpl;
+import edu.fiit.schneider_plugin.algoritm.StanfordLemmatizer;
 import edu.fiit.schneider_plugin.comment_util.RegExParser;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
@@ -20,10 +21,13 @@ import java.util.List;
 @SuppressWarnings({"unused", "FieldCanBeLocal", "Duplicates"})
 public class CommentTarget {
     private final String mergedComment;
+    //private String trimmedComment;
     private List<String> commentWordList = new ArrayList<>();
     private List<String> modifierList    = new ArrayList<>();
     private List<String> targetWordList  = new ArrayList<>();
-    private String currentString;
+    private List<String> lematisedList;
+    private String currentString;//This is variable holding actual string of variable name. It will become longer
+                                 // after it is appended with modifierList words like private static and so on
 
     public CommentTarget(List<PsiComment> comments, List<PsiElement> targets, int result) {
         //Prechadzaj komentare a vytvor string z ich slov
@@ -33,6 +37,7 @@ public class CommentTarget {
             builder.append(comment.getText());
         }
         this.mergedComment = builder.toString();
+        //this.trimmedComment = trim();
         builder.setLength(0);
         if(result == 1)
             getClassText(targets);
@@ -40,6 +45,13 @@ public class CommentTarget {
             getMethodText(targets);
         if(result == 3)
             getVariableText(targets);
+
+        this.lematisedList = StanfordLemmatizer.getSingleton().lemmatize(this.mergedComment);
+    }
+
+    //Might not need this
+    private String trim() {
+        return mergedComment.replace("[\n\t<>{}]"," ");
     }
 
     private void getClassText(List<PsiElement> targets) {
@@ -137,4 +149,34 @@ public class CommentTarget {
         return b.toString();
     }
 
+
+
+    //------------------------GETTERS------------------------
+    public String getMergedComment() {
+        return mergedComment;
+    }
+
+//    public String getTrimmedComment() {
+//        return trimmedComment;
+//    }
+
+    public List<String> getCommentWordList() {
+        return commentWordList;
+    }
+
+    public List<String> getModifierList() {
+        return modifierList;
+    }
+
+    public List<String> getTargetWordList() {
+        return targetWordList;
+    }
+
+    public String getCurrentString() {
+        return currentString;
+    }
+
+    public void setLematisedList(List<String> lematisedList) {
+        this.lematisedList = lematisedList;
+    }
 }
