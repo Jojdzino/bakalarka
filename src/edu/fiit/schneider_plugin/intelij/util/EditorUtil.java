@@ -20,4 +20,16 @@ public class EditorUtil {
         }
         return -1;
     }
+
+    public static int getLineOfElementWithOffset(PsiElement element) {
+        PsiFile containingFile = element.getContainingFile();
+        Project project = containingFile.getProject();
+        PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
+        Document document = psiDocumentManager.getDocument(containingFile);
+        int textOffset = element.getTextOffset() + element.getText().length()-1;
+        if (document != null) {
+            return document.getLineNumber(textOffset);
+        }
+        return -1;
+    }
 }

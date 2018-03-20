@@ -64,6 +64,7 @@ public class Extractor {
         PsiElement actualElement = psiComment.getNextSibling();
         List<PsiElement> targetElements = new ArrayList<>();
 
+        //TODO mozno nie pre triedu, lebo to mi oznaci celu classu
         //If comment describes method implementation
         //If comment describes class declaration
         if(psiComment.getParent().getClass()== PsiMethodImpl.class ||

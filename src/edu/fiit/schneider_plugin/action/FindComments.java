@@ -13,6 +13,7 @@ import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
+import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,22 +42,40 @@ public class FindComments extends AnAction {
         //---------------------EXTRACTION COMPLETED------------------------ -> SPECIFICATION OF COMMENTS
 
         int counter = 0;
-        List<List<PsiElement>> qualityComments  = new ArrayList<>();//Used to store comments that target method, class or variable decl.
-        List<List<PsiElement>> quantityComments = new ArrayList<>();//Used to store all other comments
+        List<List<PsiComment>> qualityComments  = new ArrayList<>();//Used to store comments that target method, class or variable decl.
+        List<List<PsiComment>> quantityComments = new ArrayList<>();//Used to store all other comments
+        List<List<PsiElement>> qualityTargets   = new ArrayList<>();
+        List<List<PsiElement>> quantityTargets  = new ArrayList<>();
         List<Integer> resultSpecificationList   = new ArrayList<>();// Contains result for each list of comments
         List<CommentTarget> pair                = new ArrayList<>();
+
         for(List<PsiElement> list:commentTargets){
             int result = Extractor.targetSpecifier(list);
-            resultSpecificationList.add(result);
             if(result >=1 && result <=3){
-                qualityComments.add(list);
+                resultSpecificationList.add(result);
+                qualityComments.add(mergedComments.get(counter));
+                qualityTargets.add(list);
                 pair.add(new CommentTarget(mergedComments.get(counter),list,result));
             }
-            else quantityComments.add(list);
+            else {
+                quantityComments.add(mergedComments.get(counter));
+                quantityTargets.add(list);
+            }
             counter++;
         }
         System.out.println();
 
+        //zafarbenie podla koherencie
+        for(int i = 0;i<pair.size();i++){
+            if(i<=0)continue;
+            if(pair.get(i).getCoherenceCoeficient()>0.5){
+                //3 types of comments
+                MainHighlighter.getInstance().highlight(qualityTargets.get(i));
+                MainHighlighter.getInstance().highlight(qualityComments.get(i));
+            }
+        }
+
+        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu
     }
 
 

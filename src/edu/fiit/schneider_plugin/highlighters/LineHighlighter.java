@@ -11,4 +11,5 @@ public class LineHighlighter {
     public void highlight(RangeHighlighter lineHighlighter, TextAttributes textAttributes, Color color) {
         textAttributes.setBackgroundColor(color);
     }
+
 }

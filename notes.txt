@@ -40,3 +40,6 @@ To by som zajtra mohol spravit + pozret butd putvt ako tam robil to zafarbovanie
 Ak toho spravim dost tak buduci tyzdne by som to realne co som planoval mohol mat hotove. Cize rovno sa teraz spytat
 co mal kajo v umysle spravit este. Lebo tato vec ma asi neudrzi moc dlho, neni toho malo ale pomalicky to kodim.
 
+OK mam highlightovanie viac menej spravene podla koeficientu. Chcel by som take volaco spravit ze kliknem na komentar,
+ktory je zvyrazneny, a ze dam alt enter a potom sa mi zvyrazni jeho target, nie ze budem mat vsetky targety stale zobrazene,
+to sa proste neda citat, ta farba je jakasi divna.
