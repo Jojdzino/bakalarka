@@ -43,3 +43,20 @@ co mal kajo v umysle spravit este. Lebo tato vec ma asi neudrzi moc dlho, neni t
 OK mam highlightovanie viac menej spravene podla koeficientu. Chcel by som take volaco spravit ze kliknem na komentar,
 ktory je zvyrazneny, a ze dam alt enter a potom sa mi zvyrazni jeho target, nie ze budem mat vsetky targety stale zobrazene,
 to sa proste neda citat, ta farba je jakasi divna.
+
+
+
+Otazky:
+Ako spravit take to alt enter napr ze akcia nejaka sa stane na niecom co mam kliknute, resp ako to hladat, lebo ani nwm co to je
+Chcel by som spravit dvojice take ze list psicommentov aj psielementov zaroven
+List<List<PsiComment>> quantityComments = new ArrayList<>();
+List<List<PsiElement>> qualityTargets   = new ArrayList<>();
+spojit do niecoho ze List<List<PsiComment>,List<PsiElement>> ale taketo nieco som nikdy nepouzil a nwm ci sa to pouziva
+
+Ok teraz to teda zobrazuje targety zaroven s komentarmi. Chcel by som spravit ze alt enter na komentar mi zobrazi jeho targety. Lenze na to budem potrebovat aby mi ten comment ostal ulozeny medzi akciami.
+Cize ked je spusteny ten intelij a skonci mi akcia na zobrazenie komentarov, apotom neskor kliknem ze show mi jeho target tak mi ostane ten koment normalne keby ho mam ulozeny v statickej premennej napr?
+
+1. chcem nezobrazovat targety hned zaroven s komentarmi lebo to moze vsetko zobrazit naraz, anpr celu class.
+2. chcem mat moznost ze clearnut to zafarbenie na konkretny komentar, ale to uvidim neskor ci stiham
+3. chcem mat clear vsetkych, to je hned
+4. chcel by som dat mozno ze ignore komentaru pri tychto veciach, napr cez nejaky keyword na zaciatku

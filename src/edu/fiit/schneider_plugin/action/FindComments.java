@@ -70,12 +70,12 @@ public class FindComments extends AnAction {
             if(i<=0)continue;
             if(pair.get(i).getCoherenceCoeficient()>0.5){
                 //3 types of comments
-                MainHighlighter.getInstance().highlight(qualityTargets.get(i));
-                MainHighlighter.getInstance().highlight(qualityComments.get(i));
+                MainHighlighter.getInstance().highlight(qualityTargets.get(i),"High coherence with target");
+                MainHighlighter.getInstance().highlight(qualityComments.get(i),"High coherence with comment");
             }
         }
 
-        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu
+        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
     }
 
 

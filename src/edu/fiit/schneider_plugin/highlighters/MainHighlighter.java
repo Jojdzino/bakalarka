@@ -43,8 +43,9 @@ public class MainHighlighter {
     /**
      * Highlights all elements from given list. Comments are highlighted with greenish color, and targets with blueish.
      * @param psiElements elements to be highlighted
+     * @param problem text representation of problem
      */
-    public void highlight(List<? extends PsiElement> psiElements) {
+    public void highlight(List<? extends PsiElement> psiElements, String problem) {
         //Jeden element moze mat deti, ale nemusi. Cize ak ma deti, zoberiem prve decko a posledne a highlightnem
         //od ich riakov. Ak nema deti highlightnem riadky od zaciatku tohto elementu po jeho koniec. Zistim si jeho
         //offset na zaciatku a aky je to riadok, a zistim si jeho offset + jeho dlzka a aky je to riadok
@@ -79,11 +80,11 @@ public class MainHighlighter {
         toLine++;
         //TODO change testname to normal error string like cohorence is too big etc...
         if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {
-            highlight(rangeHighlighter, new TextAttributes(), COMMENT_COLOR, "Comment");
+            highlight(rangeHighlighter, new TextAttributes(), COMMENT_COLOR, problem);
             this.highlightLines(COMMENT_COLOR,fromLine,toLine,"highlightLanes",editor);
         }
         else
-            highlight(rangeHighlighter, new TextAttributes(), TARGET_COLOR, "Target");
+            highlight(rangeHighlighter, new TextAttributes(), TARGET_COLOR, problem);
             this.highlightLines(TARGET_COLOR,fromLine,toLine,"highlightLanes",editor);
 
     }
@@ -100,7 +101,7 @@ public class MainHighlighter {
 
             RangeHighlighter highlighter = createRangeHighlighter(fromLine, toLine, attributes, editor);
 
-            highlight(highlighter, attributes, color);
+            highlight(highlighter, attributes, color);// might add special attributes color based on type of color of highlighting
 
             stripeHighlighter.highlight(highlighter, attributes, color, testName);
 
@@ -124,7 +125,7 @@ public class MainHighlighter {
     public static void highlight(RangeHighlighter lineHighlighter,@SuppressWarnings("unused") TextAttributes textAttributes, Color color, String testName) {
         if (testName != null) {
             lineHighlighter.setErrorStripeMarkColor(color);
-            lineHighlighter.setErrorStripeTooltip("The main.highlighter.errors on this line are:\n" + testName);
+            lineHighlighter.setErrorStripeTooltip("Problem on this line is:\n" + testName);
         }
     }
     private static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, TextAttributes attributes, Editor editor) {
