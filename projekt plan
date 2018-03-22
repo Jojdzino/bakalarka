@@ -6,5 +6,10 @@ REFACTORING FindComments:
 1.
 ked budem mat takto groupy prebehnem ich cez lematizer ako doteraz, ak je koment prilis kratky na pocet statementov tak oznacit aj taky koment
 spravit len na oznacovanie komentov
-2. ked bude koment highlightnuty, a clovek na neho klikne tak sa mu zobrazi vec ze show target, ak ma target. niektore komentare co nemaju target tak budu mat ze delete
-
+spravim to takto:
+1. zobrazim vsetky komentare, ale ich targety nie, je toho moc
+2. ak clovek klikne na komentar, a stlaci show target, tak mne sa vlastne znovu najdu vsetky komentare, spravi sa mi zase ta analyza co v 1
+najdem si koment ktory targetol user, tak ako v ignore a unignore
+3. najdem si tu grupu ktoru selektol
+4. najdem si ich target
+5. shownem target

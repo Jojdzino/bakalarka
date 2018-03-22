@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 /**
- * Taken from https://github.com/xcegin/PUTVT
+ * Highly inspired from https://github.com/xcegin/PUTVT
  */
 @SuppressWarnings({"UseJBColor", "WeakerAccess"})
 public class MainHighlighter {
@@ -25,8 +25,11 @@ public class MainHighlighter {
     private Hashtable<String, List<RangeHighlighter>> highlights;
     private static MainHighlighter instance = null;
     private final static int HIGHLIGHTING_INDEX = 50;
-    private final static Color COMMENT_COLOR = new Color(94, 148, 89, 255);
-    private final static Color TARGET_COLOR  = new Color(93, 89,150, 132);
+    private final static Color COMMENT_HIGHLIGHT_COLOR = new Color(191, 191, 191, 255);
+    private final static Color TARGET_HIGHLIGHT_COLOR = new Color(83, 143, 166, 132);
+//    private final static Color COMMENT_TEXT_COLOR = new Color(254, 255, 34);
+//    private final static TextAttributes COMMENT_ATTRIBUTES =
+//            new TextAttributes()
 
 
     public static MainHighlighter getInstance() {
@@ -80,12 +83,12 @@ public class MainHighlighter {
         toLine++;
         //TODO change testname to normal error string like cohorence is too big etc... DONE
         if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {//psidoccommentbase, nieco ako istypeof skusit
-            highlight(rangeHighlighter, new TextAttributes(), COMMENT_COLOR, problem);
-            this.highlightLines(COMMENT_COLOR,fromLine,toLine,"highlightLanes",editor);
+            highlight(rangeHighlighter, new TextAttributes(), COMMENT_HIGHLIGHT_COLOR, problem);
+            this.highlightLines(COMMENT_HIGHLIGHT_COLOR, fromLine, toLine, "highlightLanes", editor);
         }
         else
-            highlight(rangeHighlighter, new TextAttributes(), TARGET_COLOR, problem);
-            this.highlightLines(TARGET_COLOR,fromLine,toLine,"highlightLanes",editor);
+            highlight(rangeHighlighter, new TextAttributes(), TARGET_HIGHLIGHT_COLOR, problem);
+        this.highlightLines(TARGET_HIGHLIGHT_COLOR, fromLine, toLine, "highlightLanes", editor);
 
     }
 

@@ -44,7 +44,7 @@ public class IgnoreComment extends AnAction {
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
-    private PsiComment parentIsNotComment(PsiElement selectedElement) {
+    public static PsiComment parentIsNotComment(PsiElement selectedElement) {
         if(selectedElement instanceof PsiComment)return (PsiComment) selectedElement;
         if(selectedElement.getParent() == null) return null;
         return parentIsNotComment(selectedElement.getParent());

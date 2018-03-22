@@ -16,10 +16,14 @@ import edu.fiit.schneider_plugin.entity.CommentTarget;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class FindComments extends AnAction {
-    
+
+    //Need a hashmap to let me find with a comment group of psicomments. If this group of comments is in hashmap
+    // i can find
+    private static HashMap<PsiComment, List<PsiComment>> highlightedGroupsOfComments = new HashMap<>();
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
@@ -29,7 +33,6 @@ public class FindComments extends AnAction {
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = anActionEvent.getRequiredData(CommonDataKeys.EDITOR);
         PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
-        System.out.println(psiFile != null ? psiFile.getLanguage().toString() : null);
 
 
         List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);   //get list of all comments from file
@@ -37,9 +40,6 @@ public class FindComments extends AnAction {
             return;
 
         List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
-
-        mergedComments = Transformer.removeIgnoredGroups(mergedComments);
-
 
         List<List<PsiElement>> commentTargets = new ArrayList<>();// SPECIAL might contain array and linked lists, because one method insert at index 1 - better linked list
         for(List<PsiComment> actualList : mergedComments){
@@ -85,5 +85,7 @@ public class FindComments extends AnAction {
         //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
     }
 
-
+    public static HashMap<PsiComment, List<PsiComment>> getHighlightedGroupsOfComments() {
+        return highlightedGroupsOfComments;
+    }
 }

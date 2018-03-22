@@ -52,7 +52,7 @@ public class Transformer {
             }
         }
 
-        return mergedCommentLists;
+        return removeIgnoredGroups(mergedCommentLists);
     }
 
     /**
