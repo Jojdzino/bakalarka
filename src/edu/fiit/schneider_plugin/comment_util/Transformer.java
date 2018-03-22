@@ -78,4 +78,28 @@ public class Transformer {
     public static List<PsiComment> turnToList(Collection<? extends PsiComment> collection){
         return new LinkedList<>(collection);
     }
+
+    public static List<List<PsiComment>> removeIgnoredGroups(List<List<PsiComment>> mergedComments) {
+
+        List<List<PsiComment>> nonIgnoredMergedComments = new ArrayList<>();
+        boolean ignore = false;
+        //Nested loops to ignore lists that contains one or more strings of __IGNORE__
+        for (List<PsiComment> actualList : mergedComments) {
+            List<PsiComment> help = new ArrayList<>();
+            for (PsiComment actualComment : actualList) {
+                if (actualComment.getText().contains("__IGNORE__")) {
+                    ignore = true;
+                    break;
+                }
+                help.add(actualComment);
+            }
+            if (ignore) {
+                ignore = false;
+                continue;
+            }
+            nonIgnoredMergedComments.add(help);
+        }
+
+        return nonIgnoredMergedComments;
+    }
 }

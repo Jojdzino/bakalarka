@@ -33,6 +33,10 @@
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Run CommentFixer" class="edu.fiit.schneider_plugin.action.FindComments" text="Find faulty comments"
                     description="Run Comment Fixer" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
+            <action id="Ignore comment" class="edu.fiit.schneider_plugin.action.IgnoreComment" text="Ignore comment"
+                    description="Sets comment as ignored" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
+            <action id="Unignore comment" class="edu.fiit.schneider_plugin.action.UnIgnoreComment" text="Unignore comment"
+                    description="Sets comment as unignored" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
         </group>
     </actions>
 

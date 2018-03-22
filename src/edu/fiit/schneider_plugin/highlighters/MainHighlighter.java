@@ -56,7 +56,7 @@ public class MainHighlighter {
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
                 fromLine= EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-                toLine  = EditorUtil.getLineOfElement(getLastChild(psiElements.get(0)));
+                toLine  = EditorUtil.getLineOfElement(getLastChild(psiElements.get(0)));//comment
             }
             else{
                 fromLine=EditorUtil.getLineOfElement(psiElements.get(0));
@@ -78,8 +78,8 @@ public class MainHighlighter {
         rangeHighlighter = createRangeHighlighter(fromLine, toLine, new TextAttributes(),editor);
         fromLine++;
         toLine++;
-        //TODO change testname to normal error string like cohorence is too big etc...
-        if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {
+        //TODO change testname to normal error string like cohorence is too big etc... DONE
+        if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {//psidoccommentbase, nieco ako istypeof skusit
             highlight(rangeHighlighter, new TextAttributes(), COMMENT_COLOR, problem);
             this.highlightLines(COMMENT_COLOR,fromLine,toLine,"highlightLanes",editor);
         }
@@ -128,7 +128,7 @@ public class MainHighlighter {
             lineHighlighter.setErrorStripeTooltip("Problem on this line is:\n" + testName);
         }
     }
-    private static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, TextAttributes attributes, Editor editor) {
+    public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, TextAttributes attributes, Editor editor) {
         Document document = editor.getDocument();
 
         int lineStartOffset = document.getLineStartOffset(Math.max(0, fromLine - 1));

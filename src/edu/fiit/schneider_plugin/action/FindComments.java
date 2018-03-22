@@ -21,6 +21,7 @@ import java.util.List;
 public class FindComments extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
+
         //Open psifile by given project and editor
         //PsiManager manager = PsiManager.getInstance(project); //maybe needed later, code stays to help me not forget
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
@@ -28,11 +29,15 @@ public class FindComments extends AnAction {
         PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
         System.out.println(psiFile != null ? psiFile.getLanguage().toString() : null);
 
+
         List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);   //get list of all comments from file
         if(allComments.size()==0)
             return;
 
         List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
+
+        mergedComments = Transformer.removeIgnoredGroups(mergedComments);
+
 
         List<List<PsiElement>> commentTargets = new ArrayList<>();// SPECIAL might contain array and linked lists, because one method insert at index 1 - better linked list
         for(List<PsiComment> actualList : mergedComments){
