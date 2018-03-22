@@ -1,0 +1,10 @@
+Plan prace:
+SCHEDULE : 2 weeks
+
+1 week:
+REFACTORING FindComments:
+1.
+ked budem mat takto groupy prebehnem ich cez lematizer ako doteraz, ak je koment prilis kratky na pocet statementov tak oznacit aj taky koment
+spravit len na oznacovanie komentov
+2. ked bude koment highlightnuty, a clovek na neho klikne tak sa mu zobrazi vec ze show target, ak ma target. niektore komentare co nemaju target tak budu mat ze delete
+
