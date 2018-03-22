@@ -1,4 +1,4 @@
-package edu.fiit.schneider_plugin.action;
+package edu.fiit.schneider_plugin.action.ignore;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
