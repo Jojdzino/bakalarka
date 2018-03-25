@@ -13,12 +13,16 @@ import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.action.ignore.IgnoreComment;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
+import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
 import java.util.List;
 
 public class ShowTarget extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent event) {
+
+        if (ConfigAccesser.getElement("selected_all_elements") != 1)
+            return;
 
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = event.getRequiredData(CommonDataKeys.EDITOR);
@@ -32,7 +36,6 @@ public class ShowTarget extends AnAction {
         List<List<PsiComment>> mergedComments = Transformer.mergeByPosition(allComments);
 
         PsiElement selectedElement = null;
-        //System.out.println(psiFile != null ? psiFile.getLanguage().toString() : null);
         int offset = editor.getCaretModel().getOffset();
         if (psiFile != null)
             selectedElement = psiFile.findElementAt(offset);
@@ -50,7 +53,10 @@ public class ShowTarget extends AnAction {
             if (breaker) break;
         }
         // najdena grouppa ktora obsahuje ten komentar, najst k nej target a highlight
+        // spravim to tak, ze tato vec bude fungovat len ak clovek klikol highlight all
         //TODO continue here
+
+
     }
 
 }

@@ -17,7 +17,6 @@ public class ConfigAccesser {
     private static Project project;
     static {
         project = ProjectManager.getInstance().getOpenProjects()[0];
-
     }
     //Sets value of given element in XML configuration
     public static void setElement(int value, String element) throws IOException, JDOMException {

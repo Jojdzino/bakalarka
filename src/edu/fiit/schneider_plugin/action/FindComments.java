@@ -12,18 +12,43 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
+import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
+import org.jdom.JDOMException;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class FindComments extends AnAction {
 
-    //Need a hashmap to let me find with a comment group of psicomments. If this group of comments is in hashmap
-    // i can find
-    private static HashMap<PsiComment, List<PsiComment>> highlightedGroupsOfComments = new HashMap<>();
+    private static List<List<? extends PsiElement>> highlightedComments = new ArrayList<>();
+
+    public static List<List<? extends PsiElement>> getHighlightedComments() {
+        return highlightedComments;
+    }
+
+    public static void clearHighlighterComments() {
+        highlightedComments.clear();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static List<? extends PsiElement> removeList(PsiElement element) {
+        int i, j;
+        boolean abort = false;
+        List<PsiElement> targetList = null;
+        for (i = 0; i < highlightedComments.size(); i++) {
+            for (j = 0; j < highlightedComments.get(i).size(); j++)
+                if (highlightedComments.get(i).get(j) == element) {
+                    abort = true;
+                    break;
+                }
+            if (abort) break;
+        }
+        if (!abort) return null;
+        return highlightedComments.remove(i);
+    }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
@@ -77,15 +102,18 @@ public class FindComments extends AnAction {
             if(i<=0)continue;
             if(pair.get(i).getCoherenceCoeficient()>0.5){
                 //3 types of comments
-                MainHighlighter.getInstance().highlight(qualityTargets.get(i),"High coherence with target");
+                //MainHighlighter.getInstance().highlight(qualityTargets.get(i),"High coherence with target");
                 MainHighlighter.getInstance().highlight(qualityComments.get(i),"High coherence with comment");
+                highlightedComments.add(qualityComments.get(i));
             }
         }
 
-        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
-    }
+        try {
+            ConfigAccesser.setElement(1, "selected_all_elements");
+        } catch (IOException | JDOMException e) {
+            e.printStackTrace();
+        }
 
-    public static HashMap<PsiComment, List<PsiComment>> getHighlightedGroupsOfComments() {
-        return highlightedGroupsOfComments;
+        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
     }
 }
