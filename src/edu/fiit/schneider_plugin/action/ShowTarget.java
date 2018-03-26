@@ -12,8 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import edu.fiit.schneider_plugin.action.ignore.IgnoreComment;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
-import edu.fiit.schneider_plugin.comment_util.Transformer;
-import edu.fiit.schneider_plugin.config.ConfigAccesser;
+import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
 import java.util.List;
 
@@ -21,20 +20,11 @@ public class ShowTarget extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent event) {
 
-        if (ConfigAccesser.getElement("selected_all_elements") != 1)
-            return;
-
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = event.getRequiredData(CommonDataKeys.EDITOR);
         PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
 
-        List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);
-
-        if (allComments.size() == 0)
-            return;
-
-        List<List<PsiComment>> mergedComments = Transformer.mergeByPosition(allComments);
-
+        List<List<PsiComment>> mergedComments = FindComments.getHighlightedComments();
         PsiElement selectedElement = null;
         int offset = editor.getCaretModel().getOffset();
         if (psiFile != null)
@@ -52,11 +42,11 @@ public class ShowTarget extends AnAction {
                 }
             if (breaker) break;
         }
-        // najdena grouppa ktora obsahuje ten komentar, najst k nej target a highlight
-        // spravim to tak, ze tato vec bude fungovat len ak clovek klikol highlight all
-        //TODO continue here
+        if (!breaker) return;//comment was not found -> cursor wasnt at highlighted comment
+        List<PsiComment> selectedGroup = mergedComments.get(groupCounter);
+        List<PsiElement> targets = Extractor.extractTargets(selectedGroup.get(selectedGroup.size() - 1));
 
-
+        MainHighlighter.getInstance().highlight(targets, "High coherence with target", 3);
     }
 
 }

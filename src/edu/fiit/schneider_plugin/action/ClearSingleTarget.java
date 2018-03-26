@@ -25,6 +25,7 @@ import java.util.List;
 public class ClearSingleTarget extends AnAction {
     @SuppressWarnings("WeakerAccess")
     public final String IGNORE_MESSAGE = "Use '__IGNORE__' in comments or target comments and select action Ignore comment";
+    private boolean calledFromIgnore = false;
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
@@ -45,7 +46,6 @@ public class ClearSingleTarget extends AnAction {
         PsiElement targetComment = IgnoreComment.parentIsNotComment(selectedElement);
         if (targetComment == null) return;
 
-
         List<? extends PsiElement> groupOfComments = FindComments.removeList(targetComment);
         if (groupOfComments == null) return;
 
@@ -59,13 +59,28 @@ public class ClearSingleTarget extends AnAction {
             fromLine++;
             toLine++;
         }
-        StatusBar statusBar = WindowManager.getInstance()
-                .getStatusBar(CommonDataKeys.PROJECT.getData(anActionEvent.getDataContext()));
-        JBPopupFactory.getInstance()
-                .createHtmlTextBalloonBuilder(IGNORE_MESSAGE, MessageType.INFO, null)
-                .setFadeoutTime(10000)
-                .createBalloon()
-                .show(RelativePoint.getCenterOf(statusBar.getComponent()),
-                        Balloon.Position.atRight);
+        if (calledFromIgnore) {
+            StatusBar statusBar = WindowManager.getInstance()
+                    .getStatusBar(CommonDataKeys.PROJECT.getData(anActionEvent.getDataContext()));
+            JBPopupFactory.getInstance()
+                    .createHtmlTextBalloonBuilder(IGNORE_MESSAGE, MessageType.INFO, null)
+                    .setFadeoutTime(10000)
+                    .createBalloon()
+                    .show(RelativePoint.getCenterOf(statusBar.getComponent()),
+                            Balloon.Position.atRight);
+        }
+
+    }
+
+
+    /**
+     * Calls actionPerformed in a manner that baloon with message will not show up
+     *
+     * @param event anActionEvent that occoured
+     */
+    public void callAnActionFromIgnored(AnActionEvent event) {
+        calledFromIgnore = true;
+        actionPerformed(event);
+        calledFromIgnore = false;
     }
 }

@@ -10,22 +10,21 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
+import edu.fiit.schneider_plugin.comment_util.Checker;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
-import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
-import org.jdom.JDOMException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FindComments extends AnAction {
 
-    private static List<List<? extends PsiElement>> highlightedComments = new ArrayList<>();
+    private static List<List<PsiComment>> highlightedComments = new ArrayList<>();
 
-    public static List<List<? extends PsiElement>> getHighlightedComments() {
+    @SuppressWarnings("WeakerAccess")
+    public static List<List<PsiComment>> getHighlightedComments() {
         return highlightedComments;
     }
 
@@ -34,7 +33,7 @@ public class FindComments extends AnAction {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static List<? extends PsiElement> removeList(PsiElement element) {
+    public static List<PsiComment> removeList(PsiElement element) {
         int i, j;
         boolean abort = false;
         List<PsiElement> targetList = null;
@@ -50,6 +49,7 @@ public class FindComments extends AnAction {
         return highlightedComments.remove(i);
     }
 
+    @SuppressWarnings("UnusedAssignment")
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
 
@@ -66,7 +66,7 @@ public class FindComments extends AnAction {
 
         List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
 
-        List<List<PsiElement>> commentTargets = new ArrayList<>();// SPECIAL might contain array and linked lists, because one method insert at index 1 - better linked list
+        List<List<PsiElement>> commentTargets = new ArrayList<>();
         for(List<PsiComment> actualList : mergedComments){
             commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size()-1)));
         }
@@ -88,8 +88,7 @@ public class FindComments extends AnAction {
                 qualityComments.add(mergedComments.get(counter));
                 qualityTargets.add(list);
                 pair.add(new CommentTarget(mergedComments.get(counter),list,result));
-            }
-            else {
+            } else {
                 quantityComments.add(mergedComments.get(counter));
                 quantityTargets.add(list);
             }
@@ -98,22 +97,23 @@ public class FindComments extends AnAction {
         System.out.println();
 
         //zafarbenie podla koherencie
-        for(int i = 0;i<pair.size();i++){
+        for(int i = 0; i<pair.size(); i++){
             if(i<=0)continue;
             if(pair.get(i).getCoherenceCoeficient()>0.5){
                 //3 types of comments
                 //MainHighlighter.getInstance().highlight(qualityTargets.get(i),"High coherence with target");
-                MainHighlighter.getInstance().highlight(qualityComments.get(i),"High coherence with comment");
+                MainHighlighter.getInstance().highlight(qualityComments.get(i), "High coherence with comment", 0);
                 highlightedComments.add(qualityComments.get(i));
             }
         }
-
-        try {
-            ConfigAccesser.setElement(1, "selected_all_elements");
-        } catch (IOException | JDOMException e) {
-            e.printStackTrace();
-        }
-
         //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
+        boolean noTarget = false;
+        for (int i = 0; i < quantityComments.size(); i++) {
+            //highlightnutie komentaru, ktory ma target ze nic
+            noTarget = Checker.checkIfNoTarget(quantityTargets.get(i));
+
+            noTarget = false;
+        }
     }
+
 }

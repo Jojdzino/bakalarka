@@ -1,15 +1,10 @@
-Plan prace:
-SCHEDULE : 2 weeks
+Akcie:
 
-1 week:
-REFACTORING FindComments:
-1.
-ked budem mat takto groupy prebehnem ich cez lematizer ako doteraz, ak je koment prilis kratky na pocet statementov tak oznacit aj taky koment
-spravit len na oznacovanie komentov
-spravim to takto:
-1. zobrazim vsetky komentare, ale ich targety nie, je toho moc
-2. ak clovek klikne na komentar, a stlaci show target, tak mne sa vlastne znovu najdu vsetky komentare, spravi sa mi zase ta analyza co v 1
-najdem si koment ktory targetol user, tak ako v ignore a unignore
-3. najdem si tu grupu ktoru selektol
-4. najdem si ich target
-5. shownem target
+IGNORE,UNIGNORE - DONE
+SHOW TARGET - DONE
+CLEAR COMMENT - DONE
+CLEAR ALL - DONE
+HIGHLIGHT ALL - DONE - doplnit highlight komentov bez targetu, alebo na extrakciu do metod
+
+Dalsie akcie?
+

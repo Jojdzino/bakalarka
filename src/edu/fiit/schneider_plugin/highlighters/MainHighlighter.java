@@ -27,9 +27,7 @@ public class MainHighlighter {
     private static MainHighlighter instance = null;
     private final static Color COMMENT_HIGHLIGHT_COLOR = new Color(191, 191, 191, 255);
     private final static Color TARGET_HIGHLIGHT_COLOR = new Color(83, 143, 166, 132);
-//    private final static Color COMMENT_TEXT_COLOR = new Color(254, 255, 34);
-//    private final static TextAttributes COMMENT_ATTRIBUTES =
-//            new TextAttributes()
+    private final static Color COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR = new Color(191, 134, 123, 255);
 
 
     public static MainHighlighter getInstance() {
@@ -67,49 +65,48 @@ public class MainHighlighter {
     }
 
     /**
-     * Highlights all elements from given list. Comments are highlighted with greenish color, and targets with blueish.
+     * Highlights all elements from given list, color is chosen based on errorCode.
      * @param psiElements elements to be highlighted
      * @param problem text representation of problem
+     * @param errorCode codes with problem representation : 0-coherence, 1- target extraction, 2- comment has no target,
+     *                  3- target highlighting
      */
-    public void highlight(List<? extends PsiElement> psiElements, String problem) {
-        int fromLine, toLine;
+    public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode) {
+        Integer fromLine, toLine;
         Class<? extends PsiElement> decisionClass = psiElements.get(0).getClass();
         RangeHighlighter rangeHighlighter;
 
-        if (psiElements.size() == 1) {
-            if (psiElements.get(0).getChildren().length != 0) {
-                fromLine= EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-                toLine  = EditorUtil.getLineOfElement(getLastChild(psiElements.get(0)));//comment
-            }
-            else{
-                fromLine=EditorUtil.getLineOfElement(psiElements.get(0));
-                toLine  = EditorUtil.getLineOfElementWithOffset(psiElements.get(0));
-            }
-        }
-        else{
-            //If first element has children
-            if(psiElements.get(0).getChildren().length!=0)
-                 fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-            else fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
-            //If last element has children
-            PsiElement element = psiElements.get(psiElements.size()-1);
-            if(element.getChildren().length!=0)
-                toLine = EditorUtil.getLineOfElement(getLastChild(element));
-            else toLine = EditorUtil.getLineOfElement(element);
-        }
+        fromLine = setFromLine(psiElements);
+        toLine = setToLine(psiElements);
+
         Editor editor =FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
         rangeHighlighter = createRangeHighlighter(fromLine, toLine, new TextAttributes(),editor);
 
-        //TODO change testname to normal error string like cohorence is too big etc... DONE
-        if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {//psidoccommentbase, nieco ako istypeof skusit
-            highlightErrorStripe(rangeHighlighter, COMMENT_HIGHLIGHT_COLOR, problem);
-            this.highlightLines(COMMENT_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+        if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {
+            if (errorCode == 0) {
+                highlightErrorStripe(rangeHighlighter, COMMENT_HIGHLIGHT_COLOR, problem);
+                this.highlightLines(COMMENT_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+            }
+            if (errorCode == 2) {
+                highlightErrorStripe(rangeHighlighter, COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR, problem);
+                this.highlightLines(COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+            }
         } else {
             highlightErrorStripe(rangeHighlighter, TARGET_HIGHLIGHT_COLOR, problem);
             this.highlightLines(TARGET_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
         }
     }
 
+    /**
+     * Highlight lines with given color, from given fromLine up to toLine in given editor. Sidebar is highlighted with
+     * the same color, and will show message of testName.
+     *
+     * @param color    color to highlight
+     * @param fromLine line to highlight from, indexed as in IDEA
+     * @param toLine   line to highlight to, indexed as in IDEA
+     * @param testName message to show on sidebar
+     * @param editor   editor to highlight in
+     */
     public void highlightLines(final Color color, int fromLine, int toLine, String testName, Editor editor) {
         Document document = editor.getDocument();
         SideHighlighter sideHighlighter = new SideHighlighter();
@@ -133,8 +130,7 @@ public class MainHighlighter {
                 //setting specific highlighter to specific lines
                 highlighters.computeIfAbsent(editor.getMarkupModel().toString(), k -> new Hashtable<>());
                 highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
-            }
-            else{
+            } else {
                 List<RangeHighlighter> rangeHighlighterList = highlights.get(editor.getMarkupModel().toString());
                 rangeHighlighterList.add(highlighter);
                 highlighters.computeIfAbsent(editor.getMarkupModel().toString(), k -> new Hashtable<>());
@@ -143,6 +139,11 @@ public class MainHighlighter {
         }
     }
 
+    /**
+     * Clears given editor of all highlighting.
+     *
+     * @param editor editor to clear of highglighting
+     */
     public void clear(Editor editor) {
         MarkupModel model = editor.getMarkupModel();
 
@@ -155,6 +156,13 @@ public class MainHighlighter {
         highlights.remove(model.toString());
     }
 
+    /**
+     * Clears highlighting based on editor and line numbers between is highlighting to be removed.
+     * @param editor editor to search for highlighting
+     * @param fromLine first line of highlighting targets, indexed as in IDEA
+     * @param toLine last line of highlighting targets, indexed as in IDEA
+     * @return true if highlighting was removed, false otherwise
+     */
     public boolean clearSpecificHighlight(Editor editor, int fromLine, int toLine) {
         MarkupModel model = editor.getMarkupModel();
         String specificKey = String.valueOf(fromLine) + " " + String.valueOf(toLine);
@@ -176,8 +184,60 @@ public class MainHighlighter {
         return true;
     }
 
-    private PsiElement getLastChild(PsiElement element){
+    /**
+     * Returns last child of given element, recursive
+     *
+     * @param element element ot get last child from
+     * @return last child of element, or element if if has no children
+     */
+    public PsiElement getLastChild(PsiElement element){
         if(element.getChildren().length==0)return element;
         else return getLastChild(element.getLastChild());
     }
+
+    /**
+     * Return lineNumber of first element in list
+     *
+     * @param psiElements list of PsiElement to check for children
+     */
+    public int setFromLine(List<? extends PsiElement> psiElements) {
+        int fromLine;
+        if (psiElements.size() == 1) {
+            if (psiElements.get(0).getChildren().length != 0) {
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
+            } else {
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+            }
+        } else {
+            //If first element has children
+            if (psiElements.get(0).getChildren().length != 0)
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
+            else fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+        }
+        return fromLine;
+    }
+
+    /**
+     * Return lineNumber of last element in list
+     *
+     * @param psiElements list of PsiElement to check for children
+     */
+    public int setToLine(List<? extends PsiElement> psiElements) {
+        int toLine;
+        if (psiElements.size() == 1) {
+            if (psiElements.get(0).getChildren().length != 0) {
+                toLine = EditorUtil.getLineOfElement(getLastChild(psiElements.get(0)));//comment
+            } else {
+                toLine = EditorUtil.getLineOfElementWithOffset(psiElements.get(0));
+            }
+        } else {
+            //If last element has children
+            PsiElement element = psiElements.get(psiElements.size() - 1);
+            if (element.getChildren().length != 0)
+                toLine = EditorUtil.getLineOfElement(getLastChild(element));
+            else toLine = EditorUtil.getLineOfElement(element);
+        }
+        return toLine;
+    }
+
 }

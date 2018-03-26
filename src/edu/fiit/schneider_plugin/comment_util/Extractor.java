@@ -61,6 +61,7 @@ public class Extractor {
 
         int actualMaxStatementBoundTogether=maxStatementsBoundTogether;
         int realElementsCounter = 0; // User doesnt count for elements like 'SEMICOLON' and 'WHITESPACE'
+        int tokenCounter = 0;
         PsiElement actualElement = psiComment.getNextSibling();
         List<PsiElement> targetElements = new ArrayList<>();
 
@@ -83,12 +84,16 @@ public class Extractor {
         while (realElementsCounter != actualMaxStatementBoundTogether) {
             if(actualElement==null)
                 break;
-            //Block of code has ended
-            if(actualElement.getClass() == PsiWhiteSpaceImpl.class && actualElement.getText().contains("\n"))
+            //There is new line, but not before there was a token or another code
+            if (actualElement.getClass() == PsiWhiteSpaceImpl.class && actualElement.getText().matches(".*\n.*\n.*") &&
+                    (realElementsCounter != 0 || tokenCounter != 0))
                 break;
 
             if (actualElement.getClass() != PsiWhiteSpaceImpl.class && actualElement.getClass() != PsiJavaTokenImpl.class)
                 realElementsCounter++;
+
+            if (actualElement.getClass() == PsiJavaTokenImpl.class)
+                tokenCounter++;
 
             targetElements.add(actualElement);
 

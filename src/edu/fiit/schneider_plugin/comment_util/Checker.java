@@ -9,7 +9,7 @@ import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl;
 
 import java.util.List;
 
-class Checker {
+public class Checker {
 
     /**
      * Checks if second parameter is neighbor of root without any code between them
@@ -85,7 +85,6 @@ class Checker {
     public static boolean checkIfContainsCode(List<PsiElement> codeElements) {
         for (PsiElement element : codeElements) {
             Class c = element.getClass();
-            // TODO treba sa spytat Karola ci neni niekde nejaky graf pre triedy... nechcem vymenovavat veci doradu
             //noinspection StatementWithEmptyBody
             if (c == PsiJavaTokenImpl.class || c== PsiWhiteSpaceImpl.class) {
             }
@@ -93,4 +92,13 @@ class Checker {
         }
         return false;
     }
+
+    public static boolean checkIfNoTarget(List<PsiElement> elements) {
+        for (PsiElement element : elements)
+            if (element.getClass() != PsiWhiteSpaceImpl.class && element.getClass() != PsiJavaTokenImpl.class)
+                return false;
+
+        return true;
+    }
+
 }
