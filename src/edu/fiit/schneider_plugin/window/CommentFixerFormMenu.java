@@ -76,8 +76,6 @@ class CommentFixerFormMenu {
         });
     }
 
-
-
     // Checks if file is missing, if yes thats ok, if not reads it and sets values
     private void checkIfConfigMissing() {
         SAXBuilder builder = new SAXBuilder();

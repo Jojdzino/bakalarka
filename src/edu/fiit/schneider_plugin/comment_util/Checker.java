@@ -2,6 +2,8 @@ package edu.fiit.schneider_plugin.comment_util;
 
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaToken;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.PsiCommentImpl;
 import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
 import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
@@ -13,19 +15,20 @@ public class Checker {
 
     /**
      * Checks if second parameter is neighbor of root without any code between them
-     * @param root - comment to search from
+     *
+     * @param root       - comment to search from
      * @param psiComment - possible neighbor or root
      * @return true, if psiComment is neighbor or root without any code between them, else false
      */
     static boolean checkIfNeighbors(PsiComment root, PsiComment psiComment) {
-        if(root == null || psiComment==null) return false;
+        if (root == null || psiComment == null) return false;
 
         PsiElement actualElement = root.getNextSibling();
 
-        while(actualElement!=null){
-            if(actualElement.getClass() == PsiCommentImpl.class && actualElement == psiComment)
+        while (actualElement != null) {
+            if (actualElement.getClass() == PsiCommentImpl.class && actualElement == psiComment)
                 return true;
-            if(actualElement.getClass() != PsiCommentImpl.class && actualElement.getClass() != PsiWhiteSpaceImpl.class)
+            if (actualElement.getClass() != PsiCommentImpl.class && actualElement.getClass() != PsiWhiteSpaceImpl.class)
                 return false;
             actualElement = actualElement.getNextSibling();
         }
@@ -35,6 +38,7 @@ public class Checker {
     /**
      * Checks if there is source code in the same line + some special cases where comments are in new line but
      * should be considered as comments for previous line
+     *
      * @param root - source element to look if there is comment before
      * @return true if code was found in the same line, false otherwise
      */
@@ -53,7 +57,7 @@ public class Checker {
 
             // Special cases - if there is a declaration of variable ; is not closest prevSibling
             // ( declaration of variable but ; is in new line)
-            if(prevSibling.getClass() == PsiLocalVariableImpl.class)
+            if (prevSibling.getClass() == PsiLocalVariableImpl.class)
                 return true;
 
             //Normal cases
@@ -65,37 +69,25 @@ public class Checker {
 
             isNeighbor++;
             prevSibling = prevSibling.getPrevSibling();
-            if(newLine && !semicolonInSameLine)
+            if (newLine && !semicolonInSameLine)
                 return false;
-            if(!newLine && semicolonInSameLine)
+            if (!newLine && semicolonInSameLine)
                 return true;
-            if(prevSibling == null)
+            if (prevSibling == null)
                 break;
         }
 
-        if(newLine && !semicolonInSameLine)
+        if (newLine && !semicolonInSameLine)
             return false;
-        if(!newLine && semicolonInSameLine)
+        if (!newLine && semicolonInSameLine)
             return true;
 
         return false;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static boolean checkIfContainsCode(List<PsiElement> codeElements) {
-        for (PsiElement element : codeElements) {
-            Class c = element.getClass();
-            //noinspection StatementWithEmptyBody
-            if (c == PsiJavaTokenImpl.class || c== PsiWhiteSpaceImpl.class) {
-            }
-            else return true;
-        }
-        return false;
-    }
-
     public static boolean checkIfNoTarget(List<PsiElement> elements) {
         for (PsiElement element : elements)
-            if (element.getClass() != PsiWhiteSpaceImpl.class && element.getClass() != PsiJavaTokenImpl.class)
+            if (!(element instanceof PsiWhiteSpace) && !(element instanceof PsiJavaToken))
                 return false;
 
         return true;

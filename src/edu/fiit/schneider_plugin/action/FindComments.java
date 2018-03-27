@@ -10,9 +10,11 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
+import edu.fiit.schneider_plugin.comment_util.Analyser;
 import edu.fiit.schneider_plugin.comment_util.Checker;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
+import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
@@ -22,7 +24,9 @@ import java.util.List;
 public class FindComments extends AnAction {
 
     private static List<List<PsiComment>> highlightedComments = new ArrayList<>();
-
+    private static int statementsBountTogether;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int WORD_COUNT_COEFFICIENT = 2;
     @SuppressWarnings("WeakerAccess")
     public static List<List<PsiComment>> getHighlightedComments() {
         return highlightedComments;
@@ -78,13 +82,11 @@ public class FindComments extends AnAction {
         List<List<PsiComment>> quantityComments = new ArrayList<>();//Used to store all other comments
         List<List<PsiElement>> qualityTargets   = new ArrayList<>();
         List<List<PsiElement>> quantityTargets  = new ArrayList<>();
-        List<Integer> resultSpecificationList   = new ArrayList<>();// Contains result for each list of comments
         List<CommentTarget> pair                = new ArrayList<>();
 
         for(List<PsiElement> list:commentTargets){
             int result = Extractor.targetSpecifier(list);
             if(result >=1 && result <=3){
-                resultSpecificationList.add(result);
                 qualityComments.add(mergedComments.get(counter));
                 qualityTargets.add(list);
                 pair.add(new CommentTarget(mergedComments.get(counter),list,result));
@@ -100,20 +102,33 @@ public class FindComments extends AnAction {
         for(int i = 0; i<pair.size(); i++){
             if(i<=0)continue;
             if(pair.get(i).getCoherenceCoeficient()>0.5){
-                //3 types of comments
-                //MainHighlighter.getInstance().highlight(qualityTargets.get(i),"High coherence with target");
                 MainHighlighter.getInstance().highlight(qualityComments.get(i), "High coherence with comment", 0);
                 highlightedComments.add(qualityComments.get(i));
             }
         }
-        //zafarbenie ak je komentar neproporcionalne dlhy ku svojemu targetu to este porozmyslat ako napr ked ma comment 2 az 7 slov a odkazuje sa na viac ako 5 statementov
+        statementsBountTogether = ConfigAccesser.getElement("max_statement_bound_together");
         boolean noTarget = false;
+        int commentWordCount;
+        int statementCount;
         for (int i = 0; i < quantityComments.size(); i++) {
             //highlightnutie komentaru, ktory ma target ze nic
             noTarget = Checker.checkIfNoTarget(quantityTargets.get(i));
+            if (noTarget) {
+                MainHighlighter.getInstance().highlight(quantityComments.get(i), "Comment has no target", 2);
+                highlightedComments.add(quantityComments.get(i));
+            } else {
+                commentWordCount = Analyser.countWords(quantityComments.get(i));
+                statementCount = Analyser.countStatements(quantityTargets.get(i));
+                if (commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) {
+                    MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                            "Comment describes complex block, should be extracted", 1);
+                    highlightedComments.add(quantityComments.get(i));
+                }
 
+            }
             noTarget = false;
         }
     }
+
 
 }

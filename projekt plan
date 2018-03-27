@@ -7,4 +7,13 @@ CLEAR ALL - DONE
 HIGHLIGHT ALL - DONE - doplnit highlight komentov bez targetu, alebo na extrakciu do metod
 
 Dalsie akcie?
+nejake okienko navyse v ktorom by som mal ze subor a riadok v ktorom je chyba v rovnakej farbe
+
+ako programator idem refaktorovat dokumentaicu v zdrojovom kode
+co sa ocakava ze pouzivate robi v takomto refaktoringu bez mojho pluginu, co normalne robi, a co ma nasa metoda pomoct
+namiesto toho aby cital cely zdroj a rozmyslal, tak nas program highlightne nepotrebne komentare automaticky
+jedno zobrazenie je v editore...
+druhe zobrazenie bude v tom druhom okienku.
+a potom mozno preferencie programatora.
+
 

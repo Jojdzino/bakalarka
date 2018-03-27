@@ -10,7 +10,7 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
-import edu.fiit.schneider_plugin.action.ignore.IgnoreComment;
+import edu.fiit.schneider_plugin.action.intention.ignore.IgnoreCommentAction;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
@@ -30,7 +30,7 @@ public class ShowTarget extends AnAction {
         if (psiFile != null)
             selectedElement = psiFile.findElementAt(offset);
 
-        PsiComment targetComment = IgnoreComment.parentIsNotComment(selectedElement);
+        PsiComment targetComment = IgnoreCommentAction.parentIsNotComment(selectedElement);
 
         int groupCounter = 0;
         boolean breaker = false;

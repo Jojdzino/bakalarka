@@ -1,5 +1,9 @@
 package edu.fiit.schneider_plugin.highlighters;
 
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.codeInsight.intention.IntentionManager;
+import com.intellij.lang.annotation.Annotation;
+import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
@@ -7,10 +11,15 @@ import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.javadoc.PsiDocCommentImpl;
 import com.intellij.psi.impl.source.tree.PsiCommentImpl;
+import com.intellij.util.IncorrectOperationException;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -73,6 +82,40 @@ public class MainHighlighter {
      */
     public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode) {
         Integer fromLine, toLine;
+        Annotation annotation;
+        IntentionAction akcia = new IntentionAction() {
+            @Nls
+            @NotNull
+            @Override
+            public String getText() {
+                return "Text";
+            }
+
+            @Nls
+            @NotNull
+            @Override
+            public String getFamilyName() {
+                return "familyName";
+            }
+
+            @Override
+            public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile psiFile) {
+                return false;
+            }
+
+            @Override
+            public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
+                System.out.println("dasdasd");
+            }
+
+            @Override
+            public boolean startInWriteAction() {
+                System.out.println("startInWriteAction");
+                return false;
+            }
+        };
+        PsiElement first = psiElements.get(0);
+        PsiElement last = psiElements.get(psiElements.size() - 1);
         Class<? extends PsiElement> decisionClass = psiElements.get(0).getClass();
         RangeHighlighter rangeHighlighter;
 
@@ -86,6 +129,10 @@ public class MainHighlighter {
             if (errorCode == 0) {
                 highlightErrorStripe(rangeHighlighter, COMMENT_HIGHLIGHT_COLOR, problem);
                 this.highlightLines(COMMENT_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+                annotation = new Annotation(first.getTextOffset(), last.getTextOffset(),
+                        new HighlightSeverity("highlight", 5), "message", "tooltip");
+                annotation.registerFix(akcia);
+                IntentionManager.getInstance().addAction(akcia);
             }
             if (errorCode == 2) {
                 highlightErrorStripe(rangeHighlighter, COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR, problem);
@@ -95,6 +142,7 @@ public class MainHighlighter {
             highlightErrorStripe(rangeHighlighter, TARGET_HIGHLIGHT_COLOR, problem);
             this.highlightLines(TARGET_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
         }
+
     }
 
     /**

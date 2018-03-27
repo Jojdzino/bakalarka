@@ -25,7 +25,27 @@
     -->
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+
+        <intentionAction>
+            <className>edu.fiit.schneider_plugin.action.intention.DeleteCommentAction</className>
+            <category>Comments</category>
+            <descriptionDirectoryName>intentionDescriptions.DeleteCommentAction</descriptionDirectoryName>
+        </intentionAction>
+
+        <intentionAction>
+            <className>edu.fiit.schneider_plugin.action.intention.ignore.IgnoreCommentAction</className>
+            <category>Comments</category>
+            <descriptionDirectoryName>intentionDescriptions.IgnoreCommentAction</descriptionDirectoryName>
+        </intentionAction>
+
+        <intentionAction>
+            <className>edu.fiit.schneider_plugin.action.intention.ignore.UnIgnoreCommentAction</className>
+            <category>Comments</category>
+            <descriptionDirectoryName>intentionDescriptions.UnIgnoreCommentAction</descriptionDirectoryName>
+        </intentionAction>
+
+        <toolWindow id="CommentFixer menu" anchor="top" factoryClass="edu.fiit.schneider_plugin.window.Window"/>
+
     </extensions>
 
     <actions>
@@ -43,12 +63,6 @@
                     text="Clear single highlight"
                     description="Clears targetted text of highlighting"
                     icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
-            <action id="Ignore comment" class="edu.fiit.schneider_plugin.action.ignore.IgnoreComment"
-                    text="Ignore comment"
-                    description="Sets comment as ignored" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
-            <action id="Unignore comment" class="edu.fiit.schneider_plugin.action.ignore.UnIgnoreComment"
-                    text="Unignore comment"
-                    description="Sets comment as unignored" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
         </group>
     </actions>
 

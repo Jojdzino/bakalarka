@@ -3,6 +3,7 @@ package edu.fiit.schneider_plugin.action;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -17,15 +18,45 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
 import com.intellij.ui.awt.RelativePoint;
-import edu.fiit.schneider_plugin.action.ignore.IgnoreComment;
+import edu.fiit.schneider_plugin.action.intention.ignore.IgnoreCommentAction;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class ClearSingleTarget extends AnAction {
     @SuppressWarnings("WeakerAccess")
-    public final String IGNORE_MESSAGE = "Use '__IGNORE__' in comments or target comments and select action Ignore comment";
-    private boolean calledFromIgnore = false;
+    public static final String IGNORE_MESSAGE = "Use '__IGNORE__' in comments or target comments and select action Ignore comment";
+
+    public static void clearSingleTarget(@NotNull Editor editor, @NotNull PsiElement psiElement) {
+        int fromLine, toLine;
+        Document document = editor.getDocument();
+        PsiElement targetComment = IgnoreCommentAction.parentIsNotComment(psiElement);
+        if (targetComment == null) return;
+
+        List<? extends PsiElement> groupOfComments = FindComments.removeList(targetComment);
+        if (groupOfComments == null) return;
+
+        int textOffset = groupOfComments.get(0).getTextOffset();
+        fromLine = document.getLineNumber(textOffset);
+        PsiElement lastElement = groupOfComments.get(groupOfComments.size() - 1);
+        textOffset = lastElement.getTextOffset() + lastElement.getText().length();
+        toLine = document.getLineNumber(textOffset);
+
+        while (!MainHighlighter.getInstance().clearSpecificHighlight(editor, fromLine, toLine)) {
+            fromLine++;
+            toLine++;
+        }
+
+        StatusBar statusBar = WindowManager.getInstance()
+                .getStatusBar(CommonDataKeys.PROJECT.getData((DataContext) s -> null));
+        JBPopupFactory.getInstance()
+                .createHtmlTextBalloonBuilder(IGNORE_MESSAGE, MessageType.INFO, null)
+                .setFadeoutTime(10000)
+                .createBalloon()
+                .show(RelativePoint.getCenterOf(statusBar.getComponent()),
+                        Balloon.Position.atRight);
+    }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
@@ -42,8 +73,7 @@ public class ClearSingleTarget extends AnAction {
         int offset = editor.getCaretModel().getOffset();
         selectedElement = psiFile.findElementAt(offset);
         assert selectedElement != null;
-        //bude fungovat len na komenty
-        PsiElement targetComment = IgnoreComment.parentIsNotComment(selectedElement);
+        PsiElement targetComment = IgnoreCommentAction.parentIsNotComment(selectedElement);
         if (targetComment == null) return;
 
         List<? extends PsiElement> groupOfComments = FindComments.removeList(targetComment);
@@ -59,28 +89,6 @@ public class ClearSingleTarget extends AnAction {
             fromLine++;
             toLine++;
         }
-        if (calledFromIgnore) {
-            StatusBar statusBar = WindowManager.getInstance()
-                    .getStatusBar(CommonDataKeys.PROJECT.getData(anActionEvent.getDataContext()));
-            JBPopupFactory.getInstance()
-                    .createHtmlTextBalloonBuilder(IGNORE_MESSAGE, MessageType.INFO, null)
-                    .setFadeoutTime(10000)
-                    .createBalloon()
-                    .show(RelativePoint.getCenterOf(statusBar.getComponent()),
-                            Balloon.Position.atRight);
-        }
 
-    }
-
-
-    /**
-     * Calls actionPerformed in a manner that baloon with message will not show up
-     *
-     * @param event anActionEvent that occoured
-     */
-    public void callAnActionFromIgnored(AnActionEvent event) {
-        calledFromIgnore = true;
-        actionPerformed(event);
-        calledFromIgnore = false;
     }
 }
