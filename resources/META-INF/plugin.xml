@@ -24,19 +24,31 @@
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.DeleteCommentAction</className>
             <category>Comments</category>
-            <descriptionDirectoryName>intentionDescriptions.DeleteCommentAction</descriptionDirectoryName>
+            <!--<descriptionDirectoryName>resources.intentionDescriptions.DeleteCommentAction</descriptionDirectoryName>-->
         </intentionAction>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.ignore.IgnoreCommentAction</className>
             <category>Comments</category>
-            <descriptionDirectoryName>intentionDescriptions.IgnoreCommentAction</descriptionDirectoryName>
+            <!--<descriptionDirectoryName>resources.intentionDescriptions.IgnoreCommentAction</descriptionDirectoryName>-->
         </intentionAction>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.ignore.UnIgnoreCommentAction</className>
             <category>Comments</category>
-            <descriptionDirectoryName>intentionDescriptions.UnIgnoreCommentAction</descriptionDirectoryName>
+            <!--<descriptionDirectoryName>resources.intentionDescriptions.UnIgnoreCommentAction</descriptionDirectoryName>-->
+        </intentionAction>
+
+        <intentionAction>
+            <className>edu.fiit.schneider_plugin.action.intention.ClearSingleTarget</className>
+            <category>Comments</category>
+            <!--<descriptionDirectoryName>resources.intentionDescriptions.ClearSingleTarget</descriptionDirectoryName>-->
+        </intentionAction>
+
+        <intentionAction>
+            <className>edu.fiit.schneider_plugin.action.intention.ShowTargetAction</className>
+            <category>Comments</category>
+            <!--<descriptionDirectoryName>resources.intentionDescriptions.ShowTargetAction</descriptionDirectoryName>-->
         </intentionAction>
 
         <toolWindow id="CommentFixer menu" anchor="top" factoryClass="edu.fiit.schneider_plugin.window.Window"/>
@@ -49,15 +61,9 @@
             <action id="Run CommentFixer" class="edu.fiit.schneider_plugin.action.FindComments"
                     text="Find faulty comments"
                     description="Run Comment Fixer" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
-            <action id="Show target" class="edu.fiit.schneider_plugin.action.ShowTarget" text="Show target of comment"
-                    description="Shows target of selected comment" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
             <action id="Clear all targets" class="edu.fiit.schneider_plugin.action.ClearTargets"
                     text="Clear all highlighting"
                     description="Clears all text of highlightin" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
-            <action id="Clear cursor target" class="edu.fiit.schneider_plugin.action.ClearSingleTarget"
-                    text="Clear single highlight"
-                    description="Clears targetted text of highlighting"
-                    icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
         </group>
     </actions>
 

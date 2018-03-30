@@ -8,9 +8,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.util.IncorrectOperationException;
-import edu.fiit.schneider_plugin.action.ClearSingleTarget;
+import edu.fiit.schneider_plugin.action.intention.ClearSingleTarget;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,33 +19,30 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
 
     private static PsiElementFactory factory = null;
 
-    @SuppressWarnings("SimplifiableIfStatement")
-    public static PsiComment parentIsNotComment(PsiElement selectedElement) {
-        if (selectedElement instanceof PsiComment) return (PsiComment) selectedElement;
-        if (selectedElement.getParent() == null) return null;
-        return parentIsNotComment(selectedElement.getParent());
-    }
-
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
-        ClearSingleTarget.clearSingleTarget(editor, psiElement);
+        new ClearSingleTarget().invokeWithIgnore(project, editor, psiElement);
         if (factory == null) factory = PsiElementFactory.SERVICE.getInstance(project);
+        if (psiElement instanceof PsiWhiteSpace)
+            psiElement = psiElement.getPrevSibling();
 
         PsiComment newComment = factory.createCommentFromText(createIgnoredComment(psiElement.getText()), psiElement);
 
+        PsiElement finalPsiElement = psiElement; // lambda expression must be final -> what...
         WriteCommandAction.runWriteCommandAction(project, () -> {
-            psiElement.replace(newComment);
+            finalPsiElement.replace(newComment);
         });
     }
 
     @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) {
-        PsiElement targetComment = parentIsNotComment(psiElement);
+        if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
+            psiElement = psiElement.getPrevSibling();
 
-        if (targetComment instanceof PsiDocComment) return false; //cant ignore javadoc, too important
-        if (targetComment != null && targetComment.getText().contains("__IGNORE__"))
-            return false;// why ignore ignored :)
+        if (psiElement instanceof PsiDocComment) return false; //cant ignore javadoc, too important
+        if (psiElement.getText().contains("__IGNORE__"))
+            return false;
         return true;
     }
 

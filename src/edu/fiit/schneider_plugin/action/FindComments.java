@@ -10,6 +10,7 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
+import edu.fiit.schneider_plugin.WarningType;
 import edu.fiit.schneider_plugin.comment_util.Analyser;
 import edu.fiit.schneider_plugin.comment_util.Checker;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
@@ -24,17 +25,8 @@ import java.util.List;
 public class FindComments extends AnAction {
 
     private static List<List<PsiComment>> highlightedComments = new ArrayList<>();
-    private static int statementsBountTogether;
     @SuppressWarnings("FieldCanBeLocal")
     private final int WORD_COUNT_COEFFICIENT = 2;
-    @SuppressWarnings("WeakerAccess")
-    public static List<List<PsiComment>> getHighlightedComments() {
-        return highlightedComments;
-    }
-
-    public static void clearHighlighterComments() {
-        highlightedComments.clear();
-    }
 
     @SuppressWarnings("WeakerAccess")
     public static List<PsiComment> removeList(PsiElement element) {
@@ -53,18 +45,35 @@ public class FindComments extends AnAction {
         return highlightedComments.remove(i);
     }
 
+    public static List<PsiComment> getHighlightedComments(PsiElement psiElement) {
+        for (List<PsiComment> list : highlightedComments) {
+            for (PsiComment comment : list) {
+                if (comment.isEquivalentTo(psiElement))
+                    return list;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static List<List<PsiComment>> getHighlightedComments() {
+        return highlightedComments;
+    }
+
+    static void clearHighlighterComments() {
+        highlightedComments.clear();
+    }
+
     @SuppressWarnings("UnusedAssignment")
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
 
-        //Open psifile by given project and editor
-        //PsiManager manager = PsiManager.getInstance(project); //maybe needed later, code stays to help me not forget
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = anActionEvent.getRequiredData(CommonDataKeys.EDITOR);
         PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
 
 
-        List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);   //get list of all comments from file
+        List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);
         if(allComments.size()==0)
             return;
 
@@ -75,7 +84,7 @@ public class FindComments extends AnAction {
             commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size()-1)));
         }
 
-        //---------------------EXTRACTION COMPLETED------------------------ -> SPECIFICATION OF COMMENTS
+        //---------------------EXTRACTION COMPLETED------------------------ -> SPECIFICATION OF COMMENTS INTO GROUPs
 
         int counter = 0;
         List<List<PsiComment>> qualityComments  = new ArrayList<>();//Used to store comments that target method, class or variable decl.
@@ -96,32 +105,38 @@ public class FindComments extends AnAction {
             }
             counter++;
         }
-        System.out.println();
 
-        //zafarbenie podla koherencie
+        //---------------------SPECIFICATION COMPLETED------------------------ -> HIGHLIGHTING OF COMMENTS
         for(int i = 0; i<pair.size(); i++){
-            if(i<=0)continue;
+            //if(i<=0)continue;
             if(pair.get(i).getCoherenceCoeficient()>0.5){
-                MainHighlighter.getInstance().highlight(qualityComments.get(i), "High coherence with comment", 0);
+                MainHighlighter.getInstance().highlight(qualityComments.get(i),
+                        "High coherence with comment", 0, WarningType.ERROR);
+                highlightedComments.add(qualityComments.get(i));
+            }
+            if (pair.get(i).getCoherenceCoeficient() > 0.3 && pair.get(i).getCoherenceCoeficient() <= 0.5) {
+                MainHighlighter.getInstance().highlight(qualityComments.get(i),
+                        "Medium coherence with comment", 0, WarningType.WARNING);
                 highlightedComments.add(qualityComments.get(i));
             }
         }
-        statementsBountTogether = ConfigAccesser.getElement("max_statement_bound_together");
+        int statementsBountTogether = ConfigAccesser.getElement("max_statement_bound_together");
         boolean noTarget = false;
         int commentWordCount;
         int statementCount;
         for (int i = 0; i < quantityComments.size(); i++) {
-            //highlightnutie komentaru, ktory ma target ze nic
+            //highlighting of comment target without statements
             noTarget = Checker.checkIfNoTarget(quantityTargets.get(i));
             if (noTarget) {
-                MainHighlighter.getInstance().highlight(quantityComments.get(i), "Comment has no target", 2);
+                MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                        "Comment has no target", 2, WarningType.ERROR);
                 highlightedComments.add(quantityComments.get(i));
             } else {
                 commentWordCount = Analyser.countWords(quantityComments.get(i));
                 statementCount = Analyser.countStatements(quantityTargets.get(i));
                 if (commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) {
                     MainHighlighter.getInstance().highlight(quantityComments.get(i),
-                            "Comment describes complex block, should be extracted", 1);
+                            "Comment describes complex block, should be extracted", 1, WarningType.WARNING);
                     highlightedComments.add(quantityComments.get(i));
                 }
 

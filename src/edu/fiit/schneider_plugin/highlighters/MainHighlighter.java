@@ -1,25 +1,15 @@
 package edu.fiit.schneider_plugin.highlighters;
 
-import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.codeInsight.intention.IntentionManager;
-import com.intellij.lang.annotation.Annotation;
-import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.impl.source.javadoc.PsiDocCommentImpl;
-import com.intellij.psi.impl.source.tree.PsiCommentImpl;
-import com.intellij.util.IncorrectOperationException;
+import edu.fiit.schneider_plugin.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -34,9 +24,6 @@ public class MainHighlighter {
     private Hashtable<String, List<RangeHighlighter>> highlights;
     private Hashtable<String, Hashtable<String, RangeHighlighter>> highlighters;
     private static MainHighlighter instance = null;
-    private final static Color COMMENT_HIGHLIGHT_COLOR = new Color(191, 191, 191, 255);
-    private final static Color TARGET_HIGHLIGHT_COLOR = new Color(83, 143, 166, 132);
-    private final static Color COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR = new Color(191, 134, 123, 255);
 
 
     public static MainHighlighter getInstance() {
@@ -55,22 +42,24 @@ public class MainHighlighter {
         textAttributes.setBackgroundColor(color);
     }
 
-    public static void highlightErrorStripe(RangeHighlighter lineHighlighter, Color color, String testName) {
+    public static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String testName) {
         if (testName != null) {
-            lineHighlighter.setErrorStripeMarkColor(color);
-            lineHighlighter.setErrorStripeTooltip("Problem on this line is:\n" + testName);
+            rangeHighlighter.setErrorStripeMarkColor(color);
+            rangeHighlighter.setErrorStripeTooltip("Problem on this line is:\n" + testName);
         }
     }
 
-    public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, TextAttributes attributes, Editor editor) {
+    public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, WarningType warningType, Editor editor) {
         Document document = editor.getDocument();
 
         int lineStartOffset = document.getLineStartOffset(Math.max(0, fromLine));
         int lineEndOffset = document.getLineEndOffset(Math.max(0, toLine));
+        TextAttributes atributes;
+        atributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
 
         return editor.getMarkupModel().addRangeHighlighter(
-                lineStartOffset, lineEndOffset, 3333, attributes, HighlighterTargetArea.EXACT_RANGE
-        );
+                lineStartOffset, lineEndOffset, 3333, atributes, HighlighterTargetArea.EXACT_RANGE);
+
     }
 
     /**
@@ -80,67 +69,39 @@ public class MainHighlighter {
      * @param errorCode codes with problem representation : 0-coherence, 1- target extraction, 2- comment has no target,
      *                  3- target highlighting
      */
-    public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode) {
-        Integer fromLine, toLine;
-        Annotation annotation;
-        IntentionAction akcia = new IntentionAction() {
-            @Nls
-            @NotNull
-            @Override
-            public String getText() {
-                return "Text";
-            }
-
-            @Nls
-            @NotNull
-            @Override
-            public String getFamilyName() {
-                return "familyName";
-            }
-
-            @Override
-            public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile psiFile) {
-                return false;
-            }
-
-            @Override
-            public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
-                System.out.println("dasdasd");
-            }
-
-            @Override
-            public boolean startInWriteAction() {
-                System.out.println("startInWriteAction");
-                return false;
-            }
-        };
-        PsiElement first = psiElements.get(0);
-        PsiElement last = psiElements.get(psiElements.size() - 1);
-        Class<? extends PsiElement> decisionClass = psiElements.get(0).getClass();
+    public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
+        int fromLine, toLine;
         RangeHighlighter rangeHighlighter;
 
         fromLine = setFromLine(psiElements);
         toLine = setToLine(psiElements);
 
         Editor editor =FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
-        rangeHighlighter = createRangeHighlighter(fromLine, toLine, new TextAttributes(),editor);
 
-        if (decisionClass == PsiCommentImpl.class || decisionClass == PsiDocCommentImpl.class) {
+        //rangeHighlighter = createRangeHighlighter(fromLine,toLine,warning,editor);
+        if (psiElements.get(0) instanceof PsiComment) {
             if (errorCode == 0) {
-                highlightErrorStripe(rangeHighlighter, COMMENT_HIGHLIGHT_COLOR, problem);
-                this.highlightLines(COMMENT_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
-                annotation = new Annotation(first.getTextOffset(), last.getTextOffset(),
-                        new HighlightSeverity("highlight", 5), "message", "tooltip");
-                annotation.registerFix(akcia);
-                IntentionManager.getInstance().addAction(akcia);
+                switch (warning) {
+                    case INFO:
+                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine, toLine, problem, editor, warning);
+                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
+                        break;
+                    case WARNING:
+                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromLine, toLine, problem, editor, warning);
+                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
+                        break;
+                    case ERROR:
+                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine, toLine, problem, editor, warning);
+                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                }
             }
-            if (errorCode == 2) {
-                highlightErrorStripe(rangeHighlighter, COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR, problem);
-                this.highlightLines(COMMENT_WITH_NO_TARGET_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+            if (errorCode == 2) {//comment has no target
+                rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine, toLine, problem, editor, warning);
+                highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
             }
-        } else {
-            highlightErrorStripe(rangeHighlighter, TARGET_HIGHLIGHT_COLOR, problem);
-            this.highlightLines(TARGET_HIGHLIGHT_COLOR, fromLine, toLine, problem, editor);
+        } else {//target highlighting
+            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine, toLine, problem, editor, warning);
+            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
         }
 
     }
@@ -148,28 +109,25 @@ public class MainHighlighter {
     /**
      * Highlight lines with given color, from given fromLine up to toLine in given editor. Sidebar is highlighted with
      * the same color, and will show message of testName.
-     *
-     * @param color    color to highlight
+     *  @param color    color to highlight
      * @param fromLine line to highlight from, indexed as in IDEA
      * @param toLine   line to highlight to, indexed as in IDEA
      * @param testName message to show on sidebar
      * @param editor   editor to highlight in
      */
-    public void highlightLines(final Color color, int fromLine, int toLine, String testName, Editor editor) {
+    public RangeHighlighter highlightLines(final Color color, int fromLine, int toLine, String testName, Editor editor, WarningType warning) {
         Document document = editor.getDocument();
-        SideHighlighter sideHighlighter = new SideHighlighter();
+        //SideHighlighter sideHighlighter = new SideHighlighter();
 
-        ErrorStripeMarkHighlighter stripeHighlighter = new ErrorStripeMarkHighlighter();
         if (toLine <= document.getLineCount()) {
             TextAttributes attributes = new TextAttributes();
 
-            RangeHighlighter highlighter = createRangeHighlighter(fromLine, toLine, attributes, editor);
+            RangeHighlighter highlighter = createRangeHighlighter(fromLine, toLine, warning, editor);
 
             highlight(attributes, color);// might add special attributes color based on type of color of highlighting
 
-            stripeHighlighter.highlight(highlighter, color, testName);
             String fromToString = String.valueOf(fromLine) + " " + String.valueOf(toLine);
-            sideHighlighter.highlight(highlighter, color);
+            //sideHighlighter.highlight(highlighter, color);
             if (highlights.get(editor.getMarkupModel().toString())==null){
                 List<RangeHighlighter> rangeHighlighterList = new ArrayList<>();
                 rangeHighlighterList.add(highlighter);
@@ -184,53 +142,12 @@ public class MainHighlighter {
                 highlighters.computeIfAbsent(editor.getMarkupModel().toString(), k -> new Hashtable<>());
                 highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
             }
+            return highlighter;
         }
+        return null;
     }
 
-    /**
-     * Clears given editor of all highlighting.
-     *
-     * @param editor editor to clear of highglighting
-     */
-    public void clear(Editor editor) {
-        MarkupModel model = editor.getMarkupModel();
 
-        List<RangeHighlighter> rangeHighlighterList = highlights.get(model.toString());
-        if (rangeHighlighterList != null && rangeHighlighterList.size() != 0) {
-            for (RangeHighlighter rangeHighlighter : rangeHighlighterList) {
-                model.removeHighlighter(rangeHighlighter);
-            }
-        }
-        highlights.remove(model.toString());
-    }
-
-    /**
-     * Clears highlighting based on editor and line numbers between is highlighting to be removed.
-     * @param editor editor to search for highlighting
-     * @param fromLine first line of highlighting targets, indexed as in IDEA
-     * @param toLine last line of highlighting targets, indexed as in IDEA
-     * @return true if highlighting was removed, false otherwise
-     */
-    public boolean clearSpecificHighlight(Editor editor, int fromLine, int toLine) {
-        MarkupModel model = editor.getMarkupModel();
-        String specificKey = String.valueOf(fromLine) + " " + String.valueOf(toLine);
-        RangeHighlighter targetOfRemoval;
-        if (highlighters.containsKey(model.toString()))
-            targetOfRemoval = highlighters.get(model.toString()).get(specificKey);
-        else return false;
-
-        highlighters.get(model.toString()).remove(specificKey);
-
-        List<RangeHighlighter> rangeHighlighterList = highlights.get(model.toString());
-        if (rangeHighlighterList != null && rangeHighlighterList.size() != 0) {
-            for (RangeHighlighter rangeHighlighter : rangeHighlighterList) {
-                if (rangeHighlighter == targetOfRemoval)
-                    model.removeHighlighter(rangeHighlighter);
-            }
-        }
-        highlights.get(model.toString()).remove(targetOfRemoval);
-        return true;
-    }
 
     /**
      * Returns last child of given element, recursive
@@ -288,4 +205,11 @@ public class MainHighlighter {
         return toLine;
     }
 
+    public Hashtable<String, List<RangeHighlighter>> getHighlights() {
+        return highlights;
+    }
+
+    public Hashtable<String, Hashtable<String, RangeHighlighter>> getHighlighters() {
+        return highlighters;
+    }
 }
