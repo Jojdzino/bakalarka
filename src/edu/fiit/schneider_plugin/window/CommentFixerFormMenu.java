@@ -92,7 +92,6 @@ class CommentFixerFormMenu {
             List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
 
             for (Element aNodeList : nodeList) {
-
                 length = Integer.parseInt(aNodeList.getChildText("comment_length"));
                 //add other values to read
                 statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
