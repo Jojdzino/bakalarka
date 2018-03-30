@@ -10,13 +10,13 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
-import edu.fiit.schneider_plugin.WarningType;
 import edu.fiit.schneider_plugin.comment_util.Analyser;
 import edu.fiit.schneider_plugin.comment_util.Checker;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
+import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
 import java.util.ArrayList;

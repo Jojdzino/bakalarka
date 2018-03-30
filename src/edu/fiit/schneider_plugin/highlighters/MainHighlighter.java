@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
-import edu.fiit.schneider_plugin.WarningType;
+import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
 import java.awt.*;

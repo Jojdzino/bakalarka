@@ -2,7 +2,7 @@ package edu.fiit.schneider_plugin.highlighters;
 
 import com.intellij.openapi.editor.markup.EffectType;
 import com.intellij.openapi.editor.markup.TextAttributes;
-import edu.fiit.schneider_plugin.WarningType;
+import edu.fiit.schneider_plugin.entity.WarningType;
 
 import java.awt.*;
 
