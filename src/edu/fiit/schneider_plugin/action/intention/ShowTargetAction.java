@@ -36,9 +36,9 @@ public class ShowTargetAction extends PsiElementBaseIntentionAction implements I
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) {
         if (psiElement.getParent() instanceof PsiComment) psiElement = psiElement.getParent();
-        if (!(psiElement instanceof PsiComment)) return false;
         if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
             psiElement = psiElement.getPrevSibling();
+        else if (!(psiElement instanceof PsiComment)) return false;
         if (FindComments.getHighlightedComments(psiElement) == null) return false;
         return true;
     }

@@ -9,6 +9,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,10 @@ class CommentFixerFormMenu {
     //Initializes project to get current project
     static {
         project = ProjectManager.getInstance().getOpenProjects()[0];
+    }
 
+    {
+        panel.setMaximumSize(new Dimension(390, 170));
     }
 
     //sets current variable of comment length to user input and saves it into file
@@ -85,14 +89,13 @@ class CommentFixerFormMenu {
         try {
             Document document = builder.build(xmlFile);
             Element rootNode = document.getRootElement();
-            List nodeList = rootNode.getChildren("CONFIGURATION");
+            List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
 
-            for (Object aNodeList : nodeList) {
+            for (Element aNodeList : nodeList) {
 
-                Element node = (Element) aNodeList;
-                length = Integer.parseInt(node.getChildText("comment_length"));
+                length = Integer.parseInt(aNodeList.getChildText("comment_length"));
                 //add other values to read
-                statementsBoundTogether = Integer.parseInt(node.getChildText("max_statement_bound_together"));
+                statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
             }
 
         } catch (JDOMException | IOException e) {

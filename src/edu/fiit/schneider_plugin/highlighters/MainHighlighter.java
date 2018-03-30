@@ -45,7 +45,7 @@ public class MainHighlighter {
     public static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String testName) {
         if (testName != null) {
             rangeHighlighter.setErrorStripeMarkColor(color);
-            rangeHighlighter.setErrorStripeTooltip("Problem on this line is:\n" + testName);
+            rangeHighlighter.setErrorStripeTooltip("Problem :\n" + testName);
         }
     }
 
@@ -54,11 +54,11 @@ public class MainHighlighter {
 
         int lineStartOffset = document.getLineStartOffset(Math.max(0, fromLine));
         int lineEndOffset = document.getLineEndOffset(Math.max(0, toLine));
-        TextAttributes atributes;
-        atributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
+        TextAttributes attributes;
+        attributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
 
         return editor.getMarkupModel().addRangeHighlighter(
-                lineStartOffset, lineEndOffset, 3333, atributes, HighlighterTargetArea.EXACT_RANGE);
+                lineStartOffset, lineEndOffset, 3333, attributes, HighlighterTargetArea.EXACT_RANGE);
 
     }
 
@@ -70,40 +70,51 @@ public class MainHighlighter {
      *                  3- target highlighting
      */
     public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
-        int fromLine, toLine;
         RangeHighlighter rangeHighlighter;
+        int fromLine = setFromLine(psiElements);
+        int toLine = setToLine(psiElements);
+        Editor editor = FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
 
-        fromLine = setFromLine(psiElements);
-        toLine = setToLine(psiElements);
-
-        Editor editor =FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
-
-        //rangeHighlighter = createRangeHighlighter(fromLine,toLine,warning,editor);
         if (psiElements.get(0) instanceof PsiComment) {
-            if (errorCode == 0) {
-                switch (warning) {
-                    case INFO:
-                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine, toLine, problem, editor, warning);
-                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
-                        break;
-                    case WARNING:
-                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromLine, toLine, problem, editor, warning);
-                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
-                        break;
-                    case ERROR:
-                        rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine, toLine, problem, editor, warning);
-                        highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
-                }
-            }
-            if (errorCode == 2) {//comment has no target
-                rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine, toLine, problem, editor, warning);
-                highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
-            }
-        } else {//target highlighting
-            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine, toLine, problem, editor, warning);
-            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
-        }
+            switch (errorCode) {
+                case 0://quality comment
+                    switch (warning) {
+                        case INFO:
+                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND,
+                                    fromLine, toLine, problem, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
+                            break;
 
+                        case WARNING:
+                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND,
+                                    fromLine, toLine, problem, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
+                            break;
+
+                        case ERROR:
+                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND,
+                                    fromLine, toLine, problem, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                    }
+                    break;
+                case 1://comment with no target
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromLine,
+                            toLine, problem, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
+                    break;
+
+                case 2://comment has no target
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine,
+                            toLine, problem, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                    break;
+
+                default://target highlighting
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine,
+                            toLine, problem, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
+            }
+        }
     }
 
     /**
@@ -117,17 +128,17 @@ public class MainHighlighter {
      */
     public RangeHighlighter highlightLines(final Color color, int fromLine, int toLine, String testName, Editor editor, WarningType warning) {
         Document document = editor.getDocument();
-        //SideHighlighter sideHighlighter = new SideHighlighter();
+        SideHighlighter sideHighlighter = new SideHighlighter();
 
         if (toLine <= document.getLineCount()) {
             TextAttributes attributes = new TextAttributes();
 
             RangeHighlighter highlighter = createRangeHighlighter(fromLine, toLine, warning, editor);
 
-            highlight(attributes, color);// might add special attributes color based on type of color of highlighting
+            highlight(attributes, color);
 
             String fromToString = String.valueOf(fromLine) + " " + String.valueOf(toLine);
-            //sideHighlighter.highlight(highlighter, color);
+            sideHighlighter.highlight(highlighter, color);
             if (highlights.get(editor.getMarkupModel().toString())==null){
                 List<RangeHighlighter> rangeHighlighterList = new ArrayList<>();
                 rangeHighlighterList.add(highlighter);
