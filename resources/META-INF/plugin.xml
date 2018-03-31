@@ -20,6 +20,9 @@
 
 
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="edu.fiit.schneider_plugin.startup.PostStartupActivity">
+            PostStartupActivity
+        </postStartupActivity>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.DeleteCommentAction</className>
@@ -60,10 +63,10 @@
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Run CommentFixer" class="edu.fiit.schneider_plugin.action.FindComments"
                     text="Find faulty comments"
-                    description="Run Comment Fixer" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
+                    description="Run Comment Fixer" icon="/edu/fiit/schneider_plugin/icons/fix_icon.png"/>
             <action id="Clear all targets" class="edu.fiit.schneider_plugin.action.ClearTargets"
                     text="Clear all highlighting"
-                    description="Clears all text of highlightin" icon="/edu/fiit/schneider_plugin/icons/poop.png"/>
+                    description="Clears all text of highlightin" icon="/edu/fiit/schneider_plugin/icons/fix_icon.png"/>
         </group>
     </actions>
 

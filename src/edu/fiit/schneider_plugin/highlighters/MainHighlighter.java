@@ -3,11 +3,14 @@ package edu.fiit.schneider_plugin.highlighters;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
+import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
+import edu.fiit.schneider_plugin.entity.Change;
 import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
@@ -15,6 +18,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
 /**
  * Highly inspired from https://github.com/xcegin/PUTVT
  */
@@ -24,7 +28,6 @@ public class MainHighlighter {
     private Hashtable<String, List<RangeHighlighter>> highlights;
     private Hashtable<String, Hashtable<String, RangeHighlighter>> highlighters;
     private static MainHighlighter instance = null;
-
 
     public static MainHighlighter getInstance() {
         if (instance == null) {
@@ -72,7 +75,7 @@ public class MainHighlighter {
     public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
         RangeHighlighter rangeHighlighter;
         int fromLine = setFromLine(psiElements);
-        int toLine = setToLine(psiElements);
+        int toLine = getToLine(psiElements);
         Editor editor = FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
 
         if (psiElements.get(0) instanceof PsiComment) {
@@ -158,39 +161,34 @@ public class MainHighlighter {
         return null;
     }
 
+    public void rebuildMap(Change change, Project project) {
+        MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
+        String modelString = model.toString();
+        Hashtable<String, RangeHighlighter> map = highlighters.get(modelString);
+        List<String> keyList = new ArrayList<>(map.keySet());
+        StringBuilder keyBuilder = new StringBuilder();
 
-
-    /**
-     * Returns last child of given element, recursive
-     *
-     * @param element element ot get last child from
-     * @return last child of element, or element if if has no children
-     */
-    public PsiElement getLastChild(PsiElement element){
-        if(element.getChildren().length==0)return element;
-        else return getLastChild(element.getLastChild());
-    }
-
-    /**
-     * Return lineNumber of first element in list
-     *
-     * @param psiElements list of PsiElement to check for children
-     */
-    public int setFromLine(List<? extends PsiElement> psiElements) {
-        int fromLine;
-        if (psiElements.size() == 1) {
-            if (psiElements.get(0).getChildren().length != 0) {
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-            } else {
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+        for (String key : keyList) {
+            String[] arr = key.split(" ");
+            int fromLine = Integer.parseInt(arr[0]);
+            int toLine = Integer.parseInt(arr[1]);
+            if (change.getLineAt() <= fromLine || change.getLineAt() <= toLine) {
+                //mensia ako oboje -> pred celym blokom
+                if (change.getLineAt() <= fromLine) {
+                    keyBuilder.append(fromLine + change.getLineCount()).append(" ");
+                    keyBuilder.append(toLine + change.getLineCount());
+                }
+                //mensia ako toLine ale vacsia ako fromLine -> vlozil sa enter do vnutra highlighteru
+                else if (change.getLineAt() <= toLine) {
+                    keyBuilder.append(fromLine).append(" ");
+                    keyBuilder.append(toLine + change.getLineCount());
+                }
+                RangeHighlighter removedHighlighter = map.remove(key);
+                map.put(keyBuilder.toString(), removedHighlighter);
+                keyBuilder.setLength(0);
             }
-        } else {
-            //If first element has children
-            if (psiElements.get(0).getChildren().length != 0)
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-            else fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+
         }
-        return fromLine;
     }
 
     /**
@@ -198,7 +196,7 @@ public class MainHighlighter {
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public int setToLine(List<? extends PsiElement> psiElements) {
+    public int getToLine(List<? extends PsiElement> psiElements) {
         int toLine;
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
@@ -222,5 +220,42 @@ public class MainHighlighter {
 
     public Hashtable<String, Hashtable<String, RangeHighlighter>> getHighlighters() {
         return highlighters;
+    }
+
+    /**
+     * Returns last child of given element, recursive
+     *
+     * @param element element ot get last child from
+     * @return last child of element, or element if if has no children
+     */
+    public PsiElement getLastChild(PsiElement element) {
+        if (element.getChildren().length == 0) return element;
+        else return getLastChild(element.getLastChild());
+    }
+
+//    public void addToList(int lineAt, int lineDif) {
+//        this.changes.add(new Change(lineAt,lineDif));
+//    }
+
+    /**
+     * Return lineNumber of first element in list
+     *
+     * @param psiElements list of PsiElement to check for children
+     */
+    public int setFromLine(List<? extends PsiElement> psiElements) {
+        int fromLine;
+        if (psiElements.size() == 1) {
+            if (psiElements.get(0).getChildren().length != 0) {
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
+            } else {
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+            }
+        } else {
+            //If first element has children
+            if (psiElements.get(0).getChildren().length != 0)
+                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
+            else fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+        }
+        return fromLine;
     }
 }
