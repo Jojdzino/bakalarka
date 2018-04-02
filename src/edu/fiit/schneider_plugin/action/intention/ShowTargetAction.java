@@ -21,20 +21,22 @@ public class ShowTargetAction extends PsiElementBaseIntentionAction implements I
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
         if (psiElement.getParent() instanceof PsiComment) psiElement = psiElement.getParent();
+        if (psiElement.getPrevSibling() instanceof PsiComment) psiElement = psiElement.getPrevSibling();
         List<PsiComment> commentList = FindComments.getHighlightedComments(psiElement);
         if (commentList == null)
             return;
         List<PsiElement> targets = Extractor.extractTargets(commentList.get(commentList.size() - 1));
         MainHighlighter.getInstance().highlight(targets, "Target of\n ' " + targets.toString() + " '",
-                3, WarningType.INFO);
+                3, WarningType.TARGET);
 
     }
 
-    //Im gonna kil myself with those simplify if... 3 ternary in one line OMG
     @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) {
-        if (psiElement.getParent() instanceof PsiComment) psiElement = psiElement.getParent();
+        if (psiElement.getPrevSibling() instanceof PsiComment) psiElement = psiElement.getPrevSibling();
+        else if (psiElement.getParent() instanceof PsiComment)
+            psiElement = psiElement.getParent();
         if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
             psiElement = psiElement.getPrevSibling();
         else if (!(psiElement instanceof PsiComment)) return false;

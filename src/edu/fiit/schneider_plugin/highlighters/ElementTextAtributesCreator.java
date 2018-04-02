@@ -10,6 +10,9 @@ import java.awt.*;
 @SuppressWarnings({"UseJBColor", "WeakerAccess"})
 class ElementTextAtributesCreator {
 
+    static final Color TARGET_BACKGROUND = new Color(156, 203, 206);
+    static final Color TARGET_EFFECT = new Color(5, 122, 33);
+
     static final Color INFO_BACKGROUND = new Color(147, 206, 154);
     static final Color INFO_EFFECT = new Color(5, 122, 33);
 
@@ -40,6 +43,11 @@ class ElementTextAtributesCreator {
                 background = ERROR_BACKGROUND;
                 foreground = FOREGROUND;
                 effect = ERROR_EFFECT;
+                return new TextAttributes(foreground, background, effect, type, font);
+            case TARGET:
+                background = TARGET_BACKGROUND;
+                foreground = FOREGROUND;
+                effect = TARGET_EFFECT;
                 return new TextAttributes(foreground, background, effect, type, font);
         }
         return null;

@@ -125,6 +125,11 @@ public class FindComments extends AnAction {
         int commentWordCount;
         int statementCount;
         for (int i = 0; i < quantityComments.size(); i++) {
+            if (Checker.checkIfCommentedOutCode(quantityComments.get(i))) {
+                MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                        "Commented out code", 3, WarningType.ERROR);
+                highlightedComments.add(quantityComments.get(i));
+            }
             //highlighting of comment target without statements
             noTarget = Checker.checkIfNoTarget(quantityTargets.get(i));
             if (noTarget) {

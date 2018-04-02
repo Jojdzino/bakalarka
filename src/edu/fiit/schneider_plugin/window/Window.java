@@ -8,6 +8,6 @@ import org.jetbrains.annotations.NotNull;
 public class Window implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        toolWindow.getComponent().add(new CommentFixerFormMenu().getPanel1());//ProjectManager.getInstance().getOpenProjects()[0]));
+        toolWindow.getComponent().add(new CommentFixerFormMenu().getPanel1());
     }
 }

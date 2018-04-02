@@ -79,15 +79,16 @@ public class Transformer {
         return new LinkedList<>(collection);
     }
 
-    public static List<List<PsiComment>> removeIgnoredGroups(List<List<PsiComment>> mergedComments) {
+    @SuppressWarnings("WeakerAccess")
+    static List<List<PsiComment>> removeIgnoredGroups(List<List<PsiComment>> mergedComments) {
 
         List<List<PsiComment>> nonIgnoredMergedComments = new ArrayList<>();
         boolean ignore = false;
-        //Nested loops to ignore lists that contains one or more strings of __IGNORE__
+        //Nested loops to ignore lists that contains one or more strings of __I__
         for (List<PsiComment> actualList : mergedComments) {
             List<PsiComment> help = new ArrayList<>();
             for (PsiComment actualComment : actualList) {
-                if (actualComment.getText().contains("__IGNORE__")) {
+                if (actualComment.getText().contains("__I__")) {
                     ignore = true;
                     break;
                 }

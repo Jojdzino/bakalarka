@@ -66,11 +66,12 @@ public class MainHighlighter {
     }
 
     /**
-     * Highlights all elements from given list, color is chosen based on errorCode.
+     * Highlights all elements from given list, color is chosen based on errorCode. Targets are automatically assigned
+     * with default color, in their case errorCode number does not matter.
      * @param psiElements elements to be highlighted
      * @param problem text representation of problem
      * @param errorCode codes with problem representation : 0-coherence, 1- target extraction, 2- comment has no target,
-     *                  3- target highlighting
+     *                  3- other highlighting for comments
      */
     public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
         RangeHighlighter rangeHighlighter;
@@ -112,11 +113,16 @@ public class MainHighlighter {
                     highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
                     break;
 
-                default://target highlighting
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND, fromLine,
+                case 3://other highlighting
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine,
                             toLine, problem, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
             }
+        } else if (warning == WarningType.TARGET) {
+            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.TARGET_BACKGROUND,
+                    fromLine, toLine, problem, editor, warning);
+            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.TARGET_BACKGROUND, problem);
+
         }
     }
 
@@ -162,6 +168,7 @@ public class MainHighlighter {
     }
 
     public void rebuildMap(Change change, Project project) {
+        //noinspection ConstantConditions
         MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
         String modelString = model.toString();
         Hashtable<String, RangeHighlighter> map = highlighters.get(modelString);
@@ -232,10 +239,6 @@ public class MainHighlighter {
         if (element.getChildren().length == 0) return element;
         else return getLastChild(element.getLastChild());
     }
-
-//    public void addToList(int lineAt, int lineDif) {
-//        this.changes.add(new Change(lineAt,lineDif));
-//    }
 
     /**
      * Return lineNumber of first element in list

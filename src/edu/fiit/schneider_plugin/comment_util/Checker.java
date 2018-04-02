@@ -93,4 +93,13 @@ public class Checker {
         return true;
     }
 
+    //regex is not necessary, because it only checks if comment contains ';'->easier with contains
+    public static boolean checkIfCommentedOutCode(List<PsiComment> psiComments) {
+
+        for (PsiComment comment : psiComments) {
+            if (comment.getText().contains(";"))
+                return true;
+        }
+        return false;
+    }
 }

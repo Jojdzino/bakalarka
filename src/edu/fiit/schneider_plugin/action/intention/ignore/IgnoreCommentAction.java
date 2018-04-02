@@ -41,7 +41,7 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
             psiElement = psiElement.getPrevSibling();
 
         if (psiElement instanceof PsiDocComment) return false; //cant ignore javadoc, too important
-        if (psiElement.getText().contains("__IGNORE__"))
+        if (psiElement.getText().contains("__I__"))
             return false;
         return true;
     }
@@ -62,9 +62,9 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
     private String createIgnoredComment(String oldComment) {
         StringBuilder builder = new StringBuilder();
         if (oldComment.charAt(0) == '/' && oldComment.charAt(1) == '/') {
-            return builder.append("//__IGNORE__").append(oldComment.substring(2)).toString();
+            return builder.append(oldComment).append(" __I__").toString();
         } else if (oldComment.charAt(1) == '*')
-            return builder.append("/*__IGNORE__").append(oldComment.substring(2)).toString();
+            return builder.append(oldComment.substring(oldComment.length() - 2)).append(" __I__*/").toString();
         return oldComment;
     }
 

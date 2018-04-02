@@ -19,7 +19,7 @@ public class UnIgnoreCommentAction extends PsiElementBaseIntentionAction impleme
     private static PsiElementFactory factory = null;
 
     private String createUnIgnoredComment(String oldComment) {
-        return oldComment.replace("__IGNORE__", "");
+        return oldComment.replace(" __I__", "");
     }
 
     @Override
@@ -40,7 +40,7 @@ public class UnIgnoreCommentAction extends PsiElementBaseIntentionAction impleme
         if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
             psiElement = psiElement.getPrevSibling();
         if (psiElement instanceof PsiDocComment) return false;
-        if (!psiElement.getText().contains("__IGNORE__"))
+        if (!psiElement.getText().contains("__I__"))
             return false;
         return true;
     }

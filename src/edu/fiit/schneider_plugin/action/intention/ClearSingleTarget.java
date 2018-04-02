@@ -25,7 +25,7 @@ import java.util.List;
 @SuppressWarnings("Duplicates")
 public class ClearSingleTarget extends PsiElementBaseIntentionAction implements IntentionAction {
 
-    private static final String IGNORE_MESSAGE = "Use '__IGNORE__' in comments or target comments and select action Ignore comment";
+    private static final String IGNORE_MESSAGE = "Use '__I__' in comments or target comments and select action Ignore comment";
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
