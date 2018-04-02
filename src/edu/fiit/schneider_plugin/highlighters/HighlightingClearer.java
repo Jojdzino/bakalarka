@@ -4,8 +4,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 
-import java.util.Hashtable;
-import java.util.List;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 public class HighlightingClearer {
     /**
@@ -16,7 +16,7 @@ public class HighlightingClearer {
     public static void clear(Editor editor) {
         MarkupModel model = editor.getMarkupModel();
         model.removeAllHighlighters();
-        MainHighlighter.getInstance().getHighlights().remove(model.toString());
+        //MainHighlighter.getInstance().getHighlights().remove(model.toString());
         MainHighlighter.getInstance().getHighlighters().remove(model.toString()).clear();
     }
 
@@ -29,9 +29,9 @@ public class HighlightingClearer {
      */
     public static void clearSpecificHighlight(Editor editor, int fromLine, int toLine) {
         MarkupModel model = editor.getMarkupModel();
-        Hashtable<String, Hashtable<String, RangeHighlighter>> highlighters =
+        HashMap<String, TreeMap<String, RangeHighlighter>> highlighters =
                 MainHighlighter.getInstance().getHighlighters();
-        Hashtable<String, List<RangeHighlighter>> highlights = MainHighlighter.getInstance().getHighlights();
+        //Hashtable<String, List<RangeHighlighter>> highlights = MainHighlighter.getInstance().getHighlights();
 
         String specificKey = String.valueOf(fromLine) + " " + String.valueOf(toLine);
         RangeHighlighter targetOfRemoval;
@@ -40,7 +40,7 @@ public class HighlightingClearer {
         else return;
 
         model.removeHighlighter(targetOfRemoval);
-        highlights.get(model.toString()).remove(targetOfRemoval);//removing from list
+        //highlights.get(model.toString()).remove(targetOfRemoval);//removing from list
         highlighters.get(model.toString()).remove(specificKey);//removing from map by key
     }
 }

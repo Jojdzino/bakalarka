@@ -148,7 +148,8 @@ public class FindComments extends AnAction {
             }
             noTarget = false;
         }
-    }
 
+
+    }
 
 }

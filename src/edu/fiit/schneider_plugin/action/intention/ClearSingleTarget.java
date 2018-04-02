@@ -12,7 +12,9 @@ import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.javadoc.PsiDocToken;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.IncorrectOperationException;
 import edu.fiit.schneider_plugin.action.FindComments;
@@ -32,7 +34,9 @@ public class ClearSingleTarget extends PsiElementBaseIntentionAction implements 
         //If psielement is white space target previous sibling -> look at function isAvailable
         if (psiElement instanceof PsiWhiteSpace)
             psiElement = psiElement.getPrevSibling();
-        else if (psiElement.getParent() instanceof PsiComment)
+        if (psiElement instanceof PsiDocToken)
+            psiElement = psiElement.getParent();
+        if (psiElement.getParent() instanceof PsiComment)
             psiElement = psiElement.getParent();
 
         int fromLine, toLine;
@@ -57,6 +61,9 @@ public class ClearSingleTarget extends PsiElementBaseIntentionAction implements 
         if (psiElement.getParent() instanceof PsiComment) psiElement = psiElement.getParent();
         else if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
             return FindComments.getHighlightedComments(psiElement.getPrevSibling()) != null;
+        else if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiField &&
+                psiElement.getPrevSibling().getLastChild() instanceof PsiComment)
+            psiElement = psiElement.getPrevSibling().getLastChild();
         return FindComments.getHighlightedComments(psiElement) != null;
     }
 

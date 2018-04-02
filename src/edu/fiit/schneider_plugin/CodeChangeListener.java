@@ -6,7 +6,7 @@ import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.PsiWhiteSpace;
 import edu.fiit.schneider_plugin.action.FindComments;
 import edu.fiit.schneider_plugin.entity.Change;
-import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
+import edu.fiit.schneider_plugin.highlighters.MainHighlighterMapRebuilder;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +23,12 @@ public class CodeChangeListener implements PsiTreeChangeListener {
         int lineDif = countLineDifference(psiTreeChangeEvent.getOldChild(), psiTreeChangeEvent.getNewChild());
         int lineAt = EditorUtil.getLineOfElementWithOffset(psiTreeChangeEvent.getOldChild());
         if (psiTreeChangeEvent.getFile() != null && lineDif != 0) {
-            MainHighlighter.getInstance().rebuildMap(new Change(lineAt, lineDif), psiTreeChangeEvent.getParent().getProject());
+            if (lineDif > 0)
+                MainHighlighterMapRebuilder.getInstance().rebuildMapPlus(new Change(lineAt, lineDif),
+                        psiTreeChangeEvent.getParent().getProject());
+            else MainHighlighterMapRebuilder.getInstance().rebuildMapMinus(new Change(lineAt, lineDif),
+                    psiTreeChangeEvent.getParent().getProject());
+
         }
     }
 
@@ -61,8 +66,9 @@ public class CodeChangeListener implements PsiTreeChangeListener {
             int lineDif = psiTreeChangeEvent.getChild().getText().length() -
                     psiTreeChangeEvent.getChild().getText().replace("\n", "").length();
             lineDif = Math.abs(lineDif) * -1;
-            MainHighlighter.getInstance().rebuildMap(new Change(lineAt, lineDif),
+            MainHighlighterMapRebuilder.getInstance().rebuildMapMinus(new Change(lineAt, lineDif),
                     psiTreeChangeEvent.getParent().getProject());
+
         }
     }
 
@@ -71,7 +77,7 @@ public class CodeChangeListener implements PsiTreeChangeListener {
             int lineAt = EditorUtil.getLineOfElementWithOffset(psiTreeChangeEvent.getChild());
             int lineDif = psiTreeChangeEvent.getChild().getText().length() -
                     psiTreeChangeEvent.getChild().getText().replace("\n", "").length();
-            MainHighlighter.getInstance().rebuildMap(new Change(lineAt, lineDif),
+            MainHighlighterMapRebuilder.getInstance().rebuildMapPlus(new Change(lineAt, lineDif),
                     psiTreeChangeEvent.getParent().getProject());
         }
     }

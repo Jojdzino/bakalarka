@@ -3,30 +3,26 @@ package edu.fiit.schneider_plugin.highlighters;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
-import edu.fiit.schneider_plugin.entity.Change;
 import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Highly inspired from https://github.com/xcegin/PUTVT
  */
-@SuppressWarnings({"UseJBColor", "WeakerAccess"})
+@SuppressWarnings({"UseJBColor", "WeakerAccess", "Duplicates"})
 public class MainHighlighter {
 
-    private Hashtable<String, List<RangeHighlighter>> highlights;
-    private Hashtable<String, Hashtable<String, RangeHighlighter>> highlighters;
+    private HashMap<String, TreeMap<String, RangeHighlighter>> highlighters;
     private static MainHighlighter instance = null;
 
     public static MainHighlighter getInstance() {
@@ -37,8 +33,7 @@ public class MainHighlighter {
     }
 
     private MainHighlighter() {
-        highlights = new Hashtable<>();
-        highlighters = new Hashtable<>();
+        highlighters = new HashMap<>();
     }
 
     private static void highlight(TextAttributes textAttributes, Color color) {
@@ -148,54 +143,31 @@ public class MainHighlighter {
 
             String fromToString = String.valueOf(fromLine) + " " + String.valueOf(toLine);
             sideHighlighter.highlight(highlighter, color);
-            if (highlights.get(editor.getMarkupModel().toString())==null){
-                List<RangeHighlighter> rangeHighlighterList = new ArrayList<>();
-                rangeHighlighterList.add(highlighter);
-                highlights.put(editor.getMarkupModel().toString(), rangeHighlighterList);
 
-                //setting specific highlighter to specific lines
-                highlighters.computeIfAbsent(editor.getMarkupModel().toString(), k -> new Hashtable<>());
-                highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
-            } else {
-                List<RangeHighlighter> rangeHighlighterList = highlights.get(editor.getMarkupModel().toString());
-                rangeHighlighterList.add(highlighter);
-                highlighters.computeIfAbsent(editor.getMarkupModel().toString(), k -> new Hashtable<>());
-                highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
-            }
+            //setting specific highlighter to specific lines
+            createTreeMap(editor);
+            highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
             return highlighter;
         }
         return null;
     }
 
-    public void rebuildMap(Change change, Project project) {
-        //noinspection ConstantConditions
-        MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
-        String modelString = model.toString();
-        Hashtable<String, RangeHighlighter> map = highlighters.get(modelString);
-        List<String> keyList = new ArrayList<>(map.keySet());
-        StringBuilder keyBuilder = new StringBuilder();
-
-        for (String key : keyList) {
-            String[] arr = key.split(" ");
-            int fromLine = Integer.parseInt(arr[0]);
-            int toLine = Integer.parseInt(arr[1]);
-            if (change.getLineAt() <= fromLine || change.getLineAt() <= toLine) {
-                //mensia ako oboje -> pred celym blokom
-                if (change.getLineAt() <= fromLine) {
-                    keyBuilder.append(fromLine + change.getLineCount()).append(" ");
-                    keyBuilder.append(toLine + change.getLineCount());
+    private void createTreeMap(Editor editor) {
+        if (!highlighters.containsKey(editor.getMarkupModel().toString()))
+            highlighters.put(editor.getMarkupModel().toString(), new TreeMap<>((first, second) -> {
+                int first1 = Integer.parseInt(first.split(" ")[0]);
+                int first2 = Integer.parseInt(first.split(" ")[0]);
+                int second1 = Integer.parseInt(second.split(" ")[0]);
+                int second2 = Integer.parseInt(second.split(" ")[1]);
+                if (first1 == first2 && second1 == second2) {
+                    return Integer.compare(first1, second1);
                 }
-                //mensia ako toLine ale vacsia ako fromLine -> vlozil sa enter do vnutra highlighteru
-                else if (change.getLineAt() <= toLine) {
-                    keyBuilder.append(fromLine).append(" ");
-                    keyBuilder.append(toLine + change.getLineCount());
-                }
-                RangeHighlighter removedHighlighter = map.remove(key);
-                map.put(keyBuilder.toString(), removedHighlighter);
-                keyBuilder.setLength(0);
-            }
-
-        }
+                int dif1 = Math.abs(first1 - second1);
+                int dif2 = Math.abs(first2 - second2);
+                if (dif1 == dif2)
+                    return Integer.compare(dif1, dif2);
+                return first.hashCode() - second.hashCode();
+            }));
     }
 
     /**
@@ -221,11 +193,7 @@ public class MainHighlighter {
         return toLine;
     }
 
-    public Hashtable<String, List<RangeHighlighter>> getHighlights() {
-        return highlights;
-    }
-
-    public Hashtable<String, Hashtable<String, RangeHighlighter>> getHighlighters() {
+    public HashMap<String, TreeMap<String, RangeHighlighter>> getHighlighters() {
         return highlighters;
     }
 
@@ -261,4 +229,5 @@ public class MainHighlighter {
         }
         return fromLine;
     }
+
 }

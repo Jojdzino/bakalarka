@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
 
 public class Window implements ToolWindowFactory {
+
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         toolWindow.getComponent().add(new CommentFixerFormMenu().getPanel1());
