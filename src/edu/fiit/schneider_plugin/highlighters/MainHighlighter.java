@@ -12,6 +12,7 @@ import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -230,4 +231,9 @@ public class MainHighlighter {
         return fromLine;
     }
 
+    public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
+        TreeMap<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
+        if (x == null) return null;
+        return new ArrayList<>(x.values());
+    }
 }

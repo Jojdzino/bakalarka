@@ -2,8 +2,6 @@ package edu.fiit.schneider_plugin.window;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.psi.PsiComment;
-import edu.fiit.schneider_plugin.action.FindComments;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -11,7 +9,6 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -31,24 +28,80 @@ public class CommentFixerFormMenu {
     private JCheckBox snake_caseCheckBox;
     private JTabbedPane tabbedPane1;
     private JTable editorToWarningTypeEntryTable;
+    private JPanel editor;
+    private JPanel config;
     private int length = 30;
     private static Project project;
     private int statementsBoundTogether = 5;
     private TableColumn editorColumn = new TableColumn();
     private TableColumn errorColumn = new TableColumn();
+    private TableColumn rowColumn = new TableColumn();
+    private TableController tableController = new TableController();
 
-
-    //Initializes project to get current project
     static {
         project = ProjectManager.getInstance().getOpenProjects()[0];
     }
 
     {
-        panel.setMaximumSize(new Dimension(390, 170));
+        config.setMaximumSize(new Dimension(390, 170));
     }
 
     //sets current variable of comment length to user input and saves it into file
     CommentFixerFormMenu() {
+        addConfigListeners();
+        initJTable();
+        tabbedPane1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                tableController.clearTable(editorToWarningTypeEntryTable);
+                tableController.updateTable(editorToWarningTypeEntryTable);
+            }
+        });
+    }
+
+
+    private void initJTable() {
+        editorToWarningTypeEntryTable.setDefaultRenderer(Object.class, new MyTableCellRender());
+        //editorToWarningTypeEntryTable.setModel(new MyTableModel());
+        editorColumn.setHeaderValue("Editor");
+        editorToWarningTypeEntryTable.addColumn(editorColumn);
+        rowColumn.setHeaderValue("Row");
+        editorToWarningTypeEntryTable.addColumn(rowColumn);
+        errorColumn.setHeaderValue("Error type");
+        editorToWarningTypeEntryTable.addColumn(errorColumn);
+        editorToWarningTypeEntryTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+        });
+    }
+
+
+    // Checks if file is missing, if yes thats ok, if not reads it and sets values
+    private void checkIfConfigMissing() {
+        SAXBuilder builder = new SAXBuilder();
+        File xmlFile = new File(project.getBaseDir().getPath() + "/.idea/commentFixerConfig.xml");
+        if (!xmlFile.exists())
+            return;
+        try {
+            Document document = builder.build(xmlFile);
+            Element rootNode = document.getRootElement();
+            List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
+
+            for (Element aNodeList : nodeList) {
+
+                length = Integer.parseInt(aNodeList.getChildText("comment_length"));
+                //add other values to read
+                statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
+            }
+
+        } catch (JDOMException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addConfigListeners() {
         commentLengthButton.addActionListener(e -> {
             checkIfConfigMissing();
             int userInputCommentValue = Integer.parseInt(textField.getText());
@@ -85,58 +138,7 @@ public class CommentFixerFormMenu {
                 el.printStackTrace();
             }
         });
-        initJTable();
-        tabbedPane1.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                List<List<PsiComment>> groupsOfComments = FindComments.getHighlightedComments();//update table
-                DefaultTableModel dm = (DefaultTableModel) editorToWarningTypeEntryTable.getModel();
-                int rowCount = dm.getRowCount();
-                for (int i = rowCount - 1; i >= 0; i--) {
-                    dm.removeRow(i);
-                }
-
-            }
-        });
     }
-
-    private void initJTable() {
-        editorColumn.setHeaderValue("Editor");
-        editorToWarningTypeEntryTable.addColumn(editorColumn);
-        errorColumn.setHeaderValue("Error type");
-        editorToWarningTypeEntryTable.addColumn(errorColumn);
-        editorToWarningTypeEntryTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-        });
-    }
-
-
-    // Checks if file is missing, if yes thats ok, if not reads it and sets values
-    private void checkIfConfigMissing() {
-        SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File(project.getBaseDir().getPath() + "/.idea/commentFixerConfig.xml");
-        if (!xmlFile.exists())
-            return;
-        try {
-            Document document = builder.build(xmlFile);
-            Element rootNode = document.getRootElement();
-            List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
-
-            for (Element aNodeList : nodeList) {
-
-                length = Integer.parseInt(aNodeList.getChildText("comment_length"));
-                //add other values to read
-                statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
-            }
-
-        } catch (JDOMException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     JPanel getPanel1() {
         return panel;

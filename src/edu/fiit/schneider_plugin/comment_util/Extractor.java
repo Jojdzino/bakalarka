@@ -28,7 +28,6 @@ public class Extractor {
     public static List<PsiComment> extractCommentsFromPsiFile(PsiFile psiFile) {
 
         List<Collection<? extends PsiComment>> psiFileNodesCollections = new ArrayList<>();
-        List<PsiComment> elementList = new LinkedList<>();
         Class<? extends PsiComment> list = PsiComment.class;
         psiFileNodesCollections.add(PsiTreeUtil.findChildrenOfType(psiFile.getFirstChild().getParent(),list));
 
