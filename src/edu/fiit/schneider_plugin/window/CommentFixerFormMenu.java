@@ -69,12 +69,8 @@ public class CommentFixerFormMenu {
         editorToWarningTypeEntryTable.addColumn(rowColumn);
         errorColumn.setHeaderValue("Error type");
         editorToWarningTypeEntryTable.addColumn(errorColumn);
-        editorToWarningTypeEntryTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-        });
+        editorToWarningTypeEntryTable.getSelectionModel().addListSelectionListener(
+                new SelectionListener());
     }
 
 

@@ -11,10 +11,6 @@ class MyTableModel extends DefaultTableModel {
 
     private List<Color> rowColours = new ArrayList<>();
 
-    {
-        rowColours.add(null);
-    }
-
     MyTableModel(Vector columnVector, int rowActual) {
         this.columnIdentifiers = columnVector;
         this.setRowCount(rowActual);

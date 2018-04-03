@@ -17,6 +17,10 @@ import java.util.Vector;
 //nullPointerException in some cases, but that shouldnt be a problem
 class TableController {
 
+    public static List<Editor> getEditorList() {
+        return editorList;
+    }
+
     private static List<Editor> editorList = null;
 
     private Editor getEditorAtRow(int row) {
@@ -40,7 +44,7 @@ class TableController {
         editorList = new ArrayList<>();
         editorList.add(null);//null is editor for first row
         List<List<Object>> tableContent = new ArrayList<>();
-        tableContent.add(generateFirstRow());
+        //tableContent.add(generateFirstRow());
         Editor[] editors = EditorFactory.getInstance().getAllEditors();
         for (Editor editor : editors) {
             List<RangeHighlighter> highlighters = MainHighlighter.getInstance().getHighlightersByEditor(editor);
