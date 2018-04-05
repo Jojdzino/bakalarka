@@ -20,17 +20,15 @@ import java.util.List;
 
 public class CommentFixerFormMenu {
 
-    private JTextField textField;
-    private JButton commentLengthButton;
     private JPanel panel;
     private JTextField textField1;
     private JButton statementBoundTogetherButton;
-    private JCheckBox snake_caseCheckBox;
+    private JCheckBox snakeCaseCheckBox;
     private JTabbedPane tabbedPane1;
     private JTable editorToWarningTypeEntryTable;
     private JPanel editor;
     private JPanel config;
-    private int length = 30;
+    private JButton refreshTableButton;
     private static Project project;
     private int statementsBoundTogether = 5;
     private TableColumn editorColumn = new TableColumn();
@@ -53,10 +51,15 @@ public class CommentFixerFormMenu {
         tabbedPane1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                tableController.clearTable(editorToWarningTypeEntryTable);
-                tableController.updateTable(editorToWarningTypeEntryTable);
+                refreshTable();
             }
         });
+
+    }
+
+    private void refreshTable() {
+        tableController.clearTable(editorToWarningTypeEntryTable);
+        tableController.updateTable(editorToWarningTypeEntryTable);
     }
 
 
@@ -86,8 +89,6 @@ public class CommentFixerFormMenu {
             List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
 
             for (Element aNodeList : nodeList) {
-
-                length = Integer.parseInt(aNodeList.getChildText("comment_length"));
                 //add other values to read
                 statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
             }
@@ -98,19 +99,6 @@ public class CommentFixerFormMenu {
     }
 
     private void addConfigListeners() {
-        commentLengthButton.addActionListener(e -> {
-            checkIfConfigMissing();
-            int userInputCommentValue = Integer.parseInt(textField.getText());
-            if (userInputCommentValue < 3 || userInputCommentValue > 100) {
-                length = 30;
-            } else
-                length = userInputCommentValue;
-            try {
-                ConfigAccesser.setElement(length, "comment_length");
-            } catch (IOException | JDOMException e1) {
-                e1.printStackTrace();
-            }
-        });
         statementBoundTogetherButton.addActionListener(e -> {
             checkIfConfigMissing();
             int userInputStatementBoundTogether = Integer.parseInt(textField1.getText());
@@ -123,7 +111,7 @@ public class CommentFixerFormMenu {
                 e1.printStackTrace();
             }
         });
-        snake_caseCheckBox.addItemListener(e -> {
+        snakeCaseCheckBox.addItemListener(e -> {
             try {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     ConfigAccesser.setElement(1, "snake_case");
@@ -132,6 +120,12 @@ public class CommentFixerFormMenu {
                 }
             } catch (JDOMException | IOException el) {
                 el.printStackTrace();
+            }
+        });
+        refreshTableButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                refreshTable();
             }
         });
     }

@@ -48,7 +48,7 @@ public class UnIgnoreCommentAction extends PsiElementBaseIntentionAction impleme
     @NotNull
     @Override
     public String getText() {
-        return "Unignore comment";
+        return "Remove ignoring";
     }
 
     @Nls

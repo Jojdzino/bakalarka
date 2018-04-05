@@ -27,31 +27,31 @@
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.DeleteCommentAction</className>
             <category>Comments</category>
-            <!--<descriptionDirectoryName>resources.intentionDescriptions.DeleteCommentAction</descriptionDirectoryName>-->
+            <descriptionDirectoryName>DeleteCommentAction</descriptionDirectoryName>
         </intentionAction>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.ignore.IgnoreCommentAction</className>
             <category>Comments</category>
-            <!--<descriptionDirectoryName>resources.intentionDescriptions.IgnoreCommentAction</descriptionDirectoryName>-->
+            <descriptionDirectoryName>IgnoreCommentAction</descriptionDirectoryName>
         </intentionAction>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.ignore.UnIgnoreCommentAction</className>
             <category>Comments</category>
-            <!--<descriptionDirectoryName>resources.intentionDescriptions.UnIgnoreCommentAction</descriptionDirectoryName>-->
+            <descriptionDirectoryName>UnIgnoreCommentAction</descriptionDirectoryName>
         </intentionAction>
 
         <intentionAction>
-            <className>edu.fiit.schneider_plugin.action.intention.ClearSingleTarget</className>
+            <className>edu.fiit.schneider_plugin.action.intention.ClearSingleTargetAction</className>
             <category>Comments</category>
-            <!--<descriptionDirectoryName>resources.intentionDescriptions.ClearSingleTarget</descriptionDirectoryName>-->
+            <descriptionDirectoryName>ClearSingleTargetAction</descriptionDirectoryName>
         </intentionAction>
 
         <intentionAction>
             <className>edu.fiit.schneider_plugin.action.intention.ShowTargetAction</className>
             <category>Comments</category>
-            <!--<descriptionDirectoryName>resources.intentionDescriptions.ShowTargetAction</descriptionDirectoryName>-->
+            <descriptionDirectoryName>ShowTargetAction</descriptionDirectoryName>
         </intentionAction>
 
         <toolWindow id="CommentFixer menu" anchor="top" factoryClass="edu.fiit.schneider_plugin.window.Window"/>

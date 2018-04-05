@@ -9,7 +9,7 @@ import edu.fiit.schneider_plugin.entity.Change;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
 public class MainHighlighterMapRebuilder {
     private static MainHighlighterMapRebuilder instance = null;
@@ -25,7 +25,7 @@ public class MainHighlighterMapRebuilder {
         //noinspection ConstantConditions
         MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
         String modelString = model.toString();
-        TreeMap<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
+        Map<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
         List<String> keyList = new ArrayList<>(map.keySet());
         keyList = Lists.reverse(keyList);
         updateMap(change, keyList, model.toString());
@@ -35,7 +35,7 @@ public class MainHighlighterMapRebuilder {
         //noinspection ConstantConditions
         MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
         String modelString = model.toString();
-        TreeMap<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
+        Map<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
         List<String> keyList = new ArrayList<>(map.keySet());
 
         updateMap(change, keyList, model.toString());
@@ -43,7 +43,7 @@ public class MainHighlighterMapRebuilder {
     }
 
     private void updateMap(Change change, List<String> keyList, String modelString) {
-        TreeMap<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
+        Map<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
         StringBuilder keyBuilder = new StringBuilder();
         for (String key : keyList) {
             String[] arr = key.split(" ");

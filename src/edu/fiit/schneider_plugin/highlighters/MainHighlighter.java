@@ -12,10 +12,8 @@ import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.TreeMap;
 
 /**
  * Highly inspired from https://github.com/xcegin/PUTVT
@@ -23,7 +21,7 @@ import java.util.TreeMap;
 @SuppressWarnings({"UseJBColor", "WeakerAccess", "Duplicates"})
 public class MainHighlighter {
 
-    private HashMap<String, TreeMap<String, RangeHighlighter>> highlighters;
+    private Map<String, Map<String, RangeHighlighter>> highlighters;
     private static MainHighlighter instance = null;
 
     public static MainHighlighter getInstance() {
@@ -194,7 +192,7 @@ public class MainHighlighter {
         return toLine;
     }
 
-    public HashMap<String, TreeMap<String, RangeHighlighter>> getHighlighters() {
+    public Map<String, Map<String, RangeHighlighter>> getHighlighters() {
         return highlighters;
     }
 
@@ -232,7 +230,7 @@ public class MainHighlighter {
     }
 
     public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
-        TreeMap<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
+        Map<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
         if (x == null) return null;
         return new ArrayList<>(x.values());
     }

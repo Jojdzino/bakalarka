@@ -17,11 +17,8 @@ import java.util.Vector;
 //nullPointerException in some cases, but that shouldnt be a problem
 class TableController {
 
-    public static List<Editor> getEditorList() {
-        return editorList;
-    }
-
     private static List<Editor> editorList = null;
+    private static List<RangeHighlighter> rangeHighlighterList = null;//they will be in the same order as the table is orderer
 
     private Editor getEditorAtRow(int row) {
         return editorList.get(row);
@@ -35,46 +32,8 @@ class TableController {
         }
     }
 
-    //1 -> editor string name, 2. -> row of error, 3. -> problem string, 4. -> color of highlighting (not in table)
-    void updateTable(JTable table) {
-        int rowCounter = 0;
-        //int rowActual=10;
-        MyTableModel model = new MyTableModel(createColumnVector(), 0);
-        table.setModel(model);
-        editorList = new ArrayList<>();
-        editorList.add(null);//null is editor for first row
-        List<List<Object>> tableContent = new ArrayList<>();
-        //tableContent.add(generateFirstRow());
-        Editor[] editors = EditorFactory.getInstance().getAllEditors();
-        for (Editor editor : editors) {
-            List<RangeHighlighter> highlighters = MainHighlighter.getInstance().getHighlightersByEditor(editor);
-            if (highlighters == null) continue;
-            highlighters = onlyFromLayer(highlighters);
-            if (highlighters.size() == 0) continue;
-            for (RangeHighlighter highlighter : highlighters) {
-                List<Object> row = new ArrayList<>();
-                row.add(parseEditorName(editor.getDocument().toString()));
-                row.add(rowBetween(editor.getDocument(), highlighter.getStartOffset(),
-                        highlighter.getEndOffset()));
-                row.add(highlighter.getErrorStripeTooltip());
-                row.add(highlighter.getTextAttributes().getBackgroundColor());
-                tableContent.add(row);
-                editorList.add(editor);
-            }
-        }
-        for (List<Object> objectList : tableContent)
-            addIntoTable(objectList, rowCounter++, model);
-        table.setModel(model);
-        table.getColumnModel().getColumn(1).setMaxWidth(40);
-    }
-
-    private List<Object> generateFirstRow() {
-        List<Object> list = new ArrayList<>();
-        list.add("Dokument");
-        list.add("Line");
-        list.add("Problem");
-        list.add(null);
-        return list;
+    static List<Editor> getEditorList() {
+        return editorList;
     }
 
     private void addIntoTable(List<Object> objectList, int rowCounter, MyTableModel model) {
@@ -120,4 +79,44 @@ class TableController {
         return (int) (((long) x + y) / 2);
     }
 
+    static List<RangeHighlighter> getRangeHighlighterList() {
+        return rangeHighlighterList;
+    }
+
+    //1 -> editor string name, 2. -> row of error, 3. -> problem string, 4. -> color of highlighting (not in table)
+    void updateTable(JTable table) {
+        int rowCounter = 0;
+        //int rowActual=10;
+        MyTableModel model = new MyTableModel(createColumnVector(), 0);
+        table.setModel(model);
+        editorList = new ArrayList<>();
+        rangeHighlighterList = new ArrayList<>();
+        editorList.add(null);//null is editor for first row
+        List<List<Object>> tableContent = new ArrayList<>();
+        Editor[] editors = EditorFactory.getInstance().getAllEditors();
+
+        for (Editor editor : editors) {
+            List<RangeHighlighter> highlighters = MainHighlighter.getInstance().getHighlightersByEditor(editor);
+            if (highlighters == null) continue;
+            highlighters = onlyFromLayer(highlighters);
+            if (highlighters.size() == 0) continue;
+            rangeHighlighterList.addAll(highlighters);
+
+            for (RangeHighlighter highlighter : highlighters) {
+                List<Object> row = new ArrayList<>();
+                row.add(parseEditorName(editor.getDocument().toString()));
+                row.add(rowBetween(editor.getDocument(), highlighter.getStartOffset(),
+                        highlighter.getEndOffset()));
+                row.add(highlighter.getErrorStripeTooltip());
+                row.add(highlighter.getTextAttributes().getBackgroundColor());
+                tableContent.add(row);
+                editorList.add(editor);
+            }
+        }
+
+        for (List<Object> objectList : tableContent)
+            addIntoTable(objectList, rowCounter++, model);
+        table.setModel(model);
+        table.getColumnModel().getColumn(1).setMaxWidth(40);
+    }
 }

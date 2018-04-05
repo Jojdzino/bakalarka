@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @SuppressWarnings("Duplicates")
-public class ClearSingleTarget extends PsiElementBaseIntentionAction implements IntentionAction {
+public class ClearSingleTargetAction extends PsiElementBaseIntentionAction implements IntentionAction {
 
     private static final String IGNORE_MESSAGE = "Use '__I__' in comments or target comments and select action Ignore comment";
 

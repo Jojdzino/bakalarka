@@ -11,7 +11,7 @@ import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.util.IncorrectOperationException;
-import edu.fiit.schneider_plugin.action.intention.ClearSingleTarget;
+import edu.fiit.schneider_plugin.action.intention.ClearSingleTargetAction;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
-        new ClearSingleTarget().invokeWithIgnore(project, editor, psiElement);
+        new ClearSingleTargetAction().invokeWithIgnore(project, editor, psiElement);
         if (factory == null) factory = PsiElementFactory.SERVICE.getInstance(project);
         if (psiElement instanceof PsiWhiteSpace)
             psiElement = psiElement.getPrevSibling();
