@@ -48,6 +48,5 @@ class SelectionListener implements ListSelectionListener {
         selectedEditor.getScrollingModel().scrollTo(selectedEditor.offsetToLogicalPosition(selectedEditor.getCaretModel().getOffset()),
                 ScrollType.CENTER_DOWN
         );
-        System.out.println();
     }
 }

@@ -9,7 +9,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import edu.fiit.schneider_plugin.entity.WarningType;
-import edu.fiit.schneider_plugin.intelij.util.EditorUtil;
 
 import java.awt.*;
 import java.util.*;
@@ -39,23 +38,18 @@ public class MainHighlighter {
         textAttributes.setBackgroundColor(color);
     }
 
-    public static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String testName) {
-        if (testName != null) {
+    public static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String problem) {
+        if (problem != null) {
             rangeHighlighter.setErrorStripeMarkColor(color);
-            rangeHighlighter.setErrorStripeTooltip("Problem :\n" + testName);
+            rangeHighlighter.setErrorStripeTooltip(problem);
         }
     }
 
     public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, WarningType warningType, Editor editor) {
-        Document document = editor.getDocument();
-
-        int lineStartOffset = document.getLineStartOffset(Math.max(0, fromLine));
-        int lineEndOffset = document.getLineEndOffset(Math.max(0, toLine));
-        TextAttributes attributes;
-        attributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
+        TextAttributes attributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
 
         return editor.getMarkupModel().addRangeHighlighter(
-                lineStartOffset, lineEndOffset, 3333, attributes, HighlighterTargetArea.EXACT_RANGE);
+                fromLine, toLine, 3333, attributes, HighlighterTargetArea.EXACT_RANGE);
 
     }
 
@@ -69,8 +63,8 @@ public class MainHighlighter {
      */
     public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
         RangeHighlighter rangeHighlighter;
-        int fromLine = setFromLine(psiElements);
-        int toLine = getToLine(psiElements);
+        int fromOffset = getFromOffset(psiElements);
+        int toOffset = getToOffset(psiElements);
         Editor editor = FileEditorManager.getInstance(psiElements.get(0).getProject()).getSelectedTextEditor();
 
         if (psiElements.get(0) instanceof PsiComment) {
@@ -79,43 +73,50 @@ public class MainHighlighter {
                     switch (warning) {
                         case INFO:
                             rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND,
-                                    fromLine, toLine, problem, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND, problem);
+                                    fromOffset, toOffset, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND,
+                                    "Problem :\n" + problem);
                             break;
 
                         case WARNING:
                             rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND,
-                                    fromLine, toLine, problem, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
+                                    fromOffset, toOffset, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND,
+                                    "Problem :\n" + problem);
                             break;
 
                         case ERROR:
                             rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND,
-                                    fromLine, toLine, problem, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                                    fromOffset, toOffset, editor, warning);
+                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                                    "Problem :\n" + problem);
                     }
                     break;
                 case 1://comment with no target
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromLine,
-                            toLine, problem, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND, problem);
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromOffset,
+                            toOffset, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND,
+                            "Problem :\n" + problem);
                     break;
 
                 case 2://comment has no target
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine,
-                            toLine, problem, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromOffset,
+                            toOffset, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                            "Problem :\n" + problem);
                     break;
 
                 case 3://other highlighting
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromLine,
-                            toLine, problem, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND, problem);
+                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromOffset,
+                            toOffset, editor, warning);
+                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                            "Problem :\n" + problem);
             }
         } else if (warning == WarningType.TARGET) {
             rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.TARGET_BACKGROUND,
-                    fromLine, toLine, problem, editor, warning);
-            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.TARGET_BACKGROUND, problem);
+                    fromOffset, toOffset, editor, warning);
+            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.TARGET_BACKGROUND,
+                    "Target of comment");
 
         }
     }
@@ -124,22 +125,23 @@ public class MainHighlighter {
      * Highlight lines with given color, from given fromLine up to toLine in given editor. Sidebar is highlighted with
      * the same color, and will show message of testName.
      *  @param color    color to highlight
-     * @param fromLine line to highlight from, indexed as in IDEA
-     * @param toLine   line to highlight to, indexed as in IDEA
-     * @param testName message to show on sidebar
+     * @param fromOffset line to highlight from, indexed as in IDEA
+     * @param toOffset   line to highlight to, indexed as in IDEA
      * @param editor   editor to highlight in
      */
-    public RangeHighlighter highlightLines(final Color color, int fromLine, int toLine, String testName, Editor editor, WarningType warning) {
+    public RangeHighlighter highlightLines(final Color color, int fromOffset, int toOffset, Editor editor, WarningType warning) {
         Document document = editor.getDocument();
         SideHighlighter sideHighlighter = new SideHighlighter();
 
-        if (toLine <= document.getLineCount()) {
+        if (toOffset <= document.getTextLength()) {
             TextAttributes attributes = new TextAttributes();
 
-            RangeHighlighter highlighter = createRangeHighlighter(fromLine, toLine, warning, editor);
+            RangeHighlighter highlighter = createRangeHighlighter(fromOffset, toOffset, warning, editor);
 
             highlight(attributes, color);
-
+            //map has keys from and toLine
+            int fromLine = editor.getDocument().getLineNumber(fromOffset);
+            int toLine = editor.getDocument().getLineNumber(toOffset);
             String fromToString = String.valueOf(fromLine) + " " + String.valueOf(toLine);
             sideHighlighter.highlight(highlighter, color);
 
@@ -174,22 +176,26 @@ public class MainHighlighter {
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public int getToLine(List<? extends PsiElement> psiElements) {
-        int toLine;
+    public int getToOffset(List<? extends PsiElement> psiElements) {
+        int toOffset;
+        PsiElement lastChild;
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
-                toLine = EditorUtil.getLineOfElement(getLastChild(psiElements.get(0)));//comment
+                toOffset = psiElements.get(0).getTextOffset() + psiElements.get(0).getTextLength();
             } else {
-                toLine = EditorUtil.getLineOfElementWithOffset(psiElements.get(0));
+                lastChild = getLastChild(psiElements.get(0));
+                toOffset = lastChild.getTextOffset() + lastChild.getTextLength();
             }
         } else {
             //If last element has children
             PsiElement element = psiElements.get(psiElements.size() - 1);
-            if (element.getChildren().length != 0)
-                toLine = EditorUtil.getLineOfElement(getLastChild(element));
-            else toLine = EditorUtil.getLineOfElement(element);
+            if (element.getChildren().length != 0) {
+                lastChild = getLastChild(element);
+                toOffset = lastChild.getTextOffset() + lastChild.getTextLength();
+            } else
+                toOffset = element.getTextOffset() + element.getTextLength();
         }
-        return toLine;
+        return toOffset;
     }
 
     public Map<String, Map<String, RangeHighlighter>> getHighlighters() {
@@ -212,21 +218,22 @@ public class MainHighlighter {
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public int setFromLine(List<? extends PsiElement> psiElements) {
-        int fromLine;
+    public int getFromOffset(List<? extends PsiElement> psiElements) {
+        int fromOffset;
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
+                fromOffset = psiElements.get(0).getFirstChild().getTextOffset();
             } else {
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+                fromOffset = psiElements.get(0).getTextOffset();
             }
         } else {
             //If first element has children
             if (psiElements.get(0).getChildren().length != 0)
-                fromLine = EditorUtil.getLineOfElement(psiElements.get(0).getFirstChild());
-            else fromLine = EditorUtil.getLineOfElement(psiElements.get(0));
+                fromOffset = psiElements.get(0).getFirstChild().getTextOffset();
+            else
+                fromOffset = psiElements.get(0).getTextOffset();
         }
-        return fromLine;
+        return fromOffset;
     }
 
     public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
