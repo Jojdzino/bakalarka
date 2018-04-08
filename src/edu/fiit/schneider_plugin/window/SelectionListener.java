@@ -1,7 +1,7 @@
 package edu.fiit.schneider_plugin.window;
 
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -14,14 +14,11 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-@SuppressWarnings("FieldCanBeLocal")
 class SelectionListener implements ListSelectionListener {
 
     public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
-        int firstIndex = e.getFirstIndex();
-        int lastIndex = e.getLastIndex();
         boolean isAdjusting = e.getValueIsAdjusting();
         int selectedIndex = 0;
         if (!lsm.isSelectionEmpty()) {
@@ -35,23 +32,22 @@ class SelectionListener implements ListSelectionListener {
             }
         }
         if (isAdjusting) return;
-        Editor editorToBeSelected = TableController.getEditorList().get(selectedIndex);
+        Editor selectedEditor = TableController.getEditorList().get(selectedIndex);
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
-        VirtualFile file = FileDocumentManager.getInstance().getFile(editorToBeSelected.getDocument());
-        //String s = FileEditorProviderManager.getInstance().getProviders(project, file).toString();
-        //FileEditorManager.getInstance(project).setSelectedEditor(file, s);
+        VirtualFile file = FileDocumentManager.getInstance().getFile(selectedEditor.getDocument());
+        assert file != null;
         FileEditorManager.getInstance(project).openEditor(new OpenFileDescriptor(project, file), true);
         RangeHighlighter selectedHighlighter = TableController.getRangeHighlighterList().get(selectedIndex);
         //positioning selection
-        LogicalPosition posStart, posEnd;
-        posStart = FileEditorManager.getInstance(project).getSelectedTextEditor().
-                offsetToLogicalPosition(selectedHighlighter.getStartOffset());
-        posEnd = FileEditorManager.getInstance(project).getSelectedTextEditor().
-                offsetToLogicalPosition(selectedHighlighter.getEndOffset());
-        FileEditorManager.getInstance(project).getSelectedTextEditor().getSelectionModel().setBlockSelection(
-                posStart,
-                posEnd
+        selectedEditor.getSelectionModel().setSelection(
+                selectedHighlighter.getStartOffset(),
+                selectedHighlighter.getEndOffset()
         );
-        FileEditorManager.getInstance(project).getSelectedTextEditor().getScrollingModel().scrollVertically(selectedHighlighter.getStartOffset());
+        //sets caret to endOffset of given highlighter and then transforms caret offset to logical position and scrolls to it
+        selectedEditor.getCaretModel().moveToOffset(selectedHighlighter.getEndOffset());
+        selectedEditor.getScrollingModel().scrollTo(selectedEditor.offsetToLogicalPosition(selectedEditor.getCaretModel().getOffset()),
+                ScrollType.CENTER_DOWN
+        );
+        System.out.println();
     }
 }

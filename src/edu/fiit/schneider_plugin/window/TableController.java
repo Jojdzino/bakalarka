@@ -55,10 +55,8 @@ class TableController {
     }
 
 
-    private Object rowBetween(Document document, int startOffset, int endOffset) {
-        int startRow = document.getLineNumber(startOffset);
-        int endRow = document.getLineNumber(endOffset);
-        return mid(startRow, endRow);
+    private Object rowBetween(Document document, int startOffset) {
+        return document.getLineNumber(startOffset);
     }
 
     private List<RangeHighlighter> onlyFromLayer(List<RangeHighlighter> highlighters) {
@@ -75,9 +73,6 @@ class TableController {
         return arr[arr.length - 1].split("]")[0];
     }
 
-    private int mid(int x, int y) {
-        return (int) (((long) x + y) / 2);
-    }
 
     static List<RangeHighlighter> getRangeHighlighterList() {
         return rangeHighlighterList;
@@ -91,7 +86,7 @@ class TableController {
         table.setModel(model);
         editorList = new ArrayList<>();
         rangeHighlighterList = new ArrayList<>();
-        editorList.add(null);//null is editor for first row
+        //editorList.add(null);//null is editor for first row
         List<List<Object>> tableContent = new ArrayList<>();
         Editor[] editors = EditorFactory.getInstance().getAllEditors();
 
@@ -105,8 +100,7 @@ class TableController {
             for (RangeHighlighter highlighter : highlighters) {
                 List<Object> row = new ArrayList<>();
                 row.add(parseEditorName(editor.getDocument().toString()));
-                row.add(rowBetween(editor.getDocument(), highlighter.getStartOffset(),
-                        highlighter.getEndOffset()));
+                row.add(rowBetween(editor.getDocument(), highlighter.getStartOffset()));
                 row.add(highlighter.getErrorStripeTooltip());
                 row.add(highlighter.getTextAttributes().getBackgroundColor());
                 tableContent.add(row);

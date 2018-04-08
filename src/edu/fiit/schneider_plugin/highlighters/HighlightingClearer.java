@@ -4,8 +4,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 
-import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.Map;
 
 public class HighlightingClearer {
     /**
@@ -29,7 +28,7 @@ public class HighlightingClearer {
      */
     public static void clearSpecificHighlight(Editor editor, int fromLine, int toLine) {
         MarkupModel model = editor.getMarkupModel();
-        HashMap<String, TreeMap<String, RangeHighlighter>> highlighters =
+        Map<String, Map<String, RangeHighlighter>> highlighters =
                 MainHighlighter.getInstance().getHighlighters();
         //Hashtable<String, List<RangeHighlighter>> highlights = MainHighlighter.getInstance().getHighlights();
 
