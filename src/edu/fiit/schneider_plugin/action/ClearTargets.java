@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import edu.fiit.schneider_plugin.highlighters.HighlightingClearer;
 
+//clears target
 public class ClearTargets extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {

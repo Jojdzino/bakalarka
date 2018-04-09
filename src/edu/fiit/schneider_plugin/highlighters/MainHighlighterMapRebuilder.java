@@ -26,6 +26,7 @@ public class MainHighlighterMapRebuilder {
         MarkupModel model = FileEditorManager.getInstance(project).getSelectedTextEditor().getMarkupModel();
         String modelString = model.toString();
         Map<String, RangeHighlighter> map = MainHighlighter.getInstance().getHighlighters().get(modelString);
+        if (map.keySet().size() == 0) return;
         List<String> keyList = new ArrayList<>(map.keySet());
         keyList = Lists.reverse(keyList);
         updateMap(change, keyList, model.toString());
@@ -39,6 +40,7 @@ public class MainHighlighterMapRebuilder {
         List<String> keyList = new ArrayList<>(map.keySet());
 
         updateMap(change, keyList, model.toString());
+
 
     }
 

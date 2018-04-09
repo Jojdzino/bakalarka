@@ -1,9 +1,25 @@
-# Bachelor project on subject of "Znackovanie zdrojovych kodov" - Source code annotating
+# CommentFixer - tool to highlight bad Java comments
 
-## About
-This project is plugin for Intelij IDEA. Its main purpose is highlightning bad comments that should be changed, refactored. Plugin can imply that affiliated code should be refactored as well based on information extracted from comments.
+This repository is bachelor thesis project implementation. Its main purpose is highlighting incorrect comments based on
+metrics that were discussed in project. It is not recommended for skilled users only for beginners and intermediate programmers.
+Project link will be added later on.
+## Getting Started
 
+To install this plugin download it from Intellij plugin databse. Go to File -> Settings -> Plugins -> (Bottom) Browse repositories.
+Input "CommentFixer" select install and woala.
+### Prerequisites
 
-## Files
+You need to download https://stanfordnlp.github.io/CoreNLP/download.html and put inside resource folder.
 
-Plugin does need jar files from https://stanfordnlp.github.io/CoreNLP/download.html to work properly.
+## Built With
+
+* [Intellij](https://www.jetbrains.com/idea/) - Intellij 
+
+## Authors
+
+* **Jozef Schneider**
+
+## License
+
+This project is licensed under the FIIT STU licence.
+

@@ -77,7 +77,7 @@ public class CommentFixerFormMenu {
     }
 
 
-    // Checks if file is missing, if yes thats ok, if not reads it and sets values
+    //Checks if file is missing, if yes thats ok, if not reads it and sets values
     private void checkIfConfigMissing() {
         SAXBuilder builder = new SAXBuilder();
         File xmlFile = new File(project.getBaseDir().getPath() + "/.idea/commentFixerConfig.xml");
@@ -100,7 +100,7 @@ public class CommentFixerFormMenu {
 
     private void addConfigListeners() {
         statementBoundTogetherButton.addActionListener(e -> {
-            checkIfConfigMissing();
+            //checkIfConfigMissing();
             int userInputStatementBoundTogether = Integer.parseInt(textField1.getText());
             if (userInputStatementBoundTogether < 1 || userInputStatementBoundTogether > 10) {
                 statementsBoundTogether = 10;

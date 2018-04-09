@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.List;
 
 /**
- * Highly inspired from https://github.com/xcegin/PUTVT
+ * Inspired from https://github.com/xcegin/PUTVT
  */
 @SuppressWarnings({"UseJBColor", "WeakerAccess", "Duplicates"})
 public class MainHighlighter {
