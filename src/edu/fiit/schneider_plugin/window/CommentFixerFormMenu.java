@@ -101,6 +101,7 @@ public class CommentFixerFormMenu {
     private void addConfigListeners() {
         statementBoundTogetherButton.addActionListener(e -> {
             //checkIfConfigMissing();
+
             int userInputStatementBoundTogether = Integer.parseInt(textField1.getText());
             if (userInputStatementBoundTogether < 1 || userInputStatementBoundTogether > 10) {
                 statementsBoundTogether = 10;

@@ -11,6 +11,7 @@ import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
 import com.intellij.psi.impl.source.tree.java.PsiForStatementImpl;
 import com.intellij.psi.impl.source.tree.java.PsiForeachStatementImpl;
 import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
+import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl;
 import com.intellij.psi.util.PsiTreeUtil;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
@@ -139,6 +140,8 @@ public class Extractor {
             if (actual.getClass() == PsiMethodImpl.class) return 2;
             if (actual.getClass() == PsiFieldImpl.class ||
                     actual.getParent().getClass() == PsiFieldImpl.class) return 3;
+            if (actual.getClass() == PsiLocalVariableImpl.class)
+                return 3;
         }
 
         return -1;

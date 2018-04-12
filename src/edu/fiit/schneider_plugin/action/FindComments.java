@@ -16,6 +16,7 @@ import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
+import edu.fiit.schneider_plugin.entity.SpecialStatementType;
 import edu.fiit.schneider_plugin.entity.WarningType;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
@@ -26,7 +27,7 @@ public class FindComments extends AnAction {
 
     private static List<List<PsiComment>> highlightedComments = new ArrayList<>();
     @SuppressWarnings("FieldCanBeLocal")
-    private final int WORD_COUNT_COEFFICIENT = 2;
+    private final int WORD_COUNT_COEFFICIENT = 3;
 
     @SuppressWarnings("WeakerAccess")
     public static List<PsiComment> removeList(PsiElement element) {
@@ -74,31 +75,29 @@ public class FindComments extends AnAction {
 
 
         List<PsiComment> allComments = Extractor.extractCommentsFromPsiFile(psiFile);
-        if(allComments.size()==0)
+        if (allComments.size() == 0)
             return;
 
-        List<List<PsiComment>> mergedComments= Transformer.mergeByPosition(allComments);
+        List<List<PsiComment>> mergedComments = Transformer.mergeByPosition(allComments);
 
         List<List<PsiElement>> commentTargets = new ArrayList<>();
-        for(List<PsiComment> actualList : mergedComments){
-            commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size()-1)));
+        for (List<PsiComment> actualList : mergedComments) {
+            commentTargets.add(Extractor.extractTargets(actualList.get(actualList.size() - 1)));
         }
 
         //---------------------EXTRACTION COMPLETED------------------------ -> SPECIFICATION OF COMMENTS INTO GROUPs
 
         int counter = 0;
-        List<List<PsiComment>> qualityComments  = new ArrayList<>();//Used to store comments that target method, class or variable decl.
+        List<List<PsiComment>> qualityComments = new ArrayList<>();//Used to store comments that target method, class or variable decl.
         List<List<PsiComment>> quantityComments = new ArrayList<>();//Used to store all other comments
-        List<List<PsiElement>> qualityTargets   = new ArrayList<>();
-        List<List<PsiElement>> quantityTargets  = new ArrayList<>();
-        List<CommentTarget> pair                = new ArrayList<>();
+        List<List<PsiElement>> quantityTargets = new ArrayList<>();
+        List<CommentTarget> pair = new ArrayList<>();
 
-        for(List<PsiElement> list:commentTargets){
+        for (List<PsiElement> list : commentTargets) {
             int result = Extractor.targetSpecifier(list);
-            if(result >=1 && result <=3){
+            if (result >= 1 && result <= 3) {
                 qualityComments.add(mergedComments.get(counter));
-                qualityTargets.add(list);
-                pair.add(new CommentTarget(mergedComments.get(counter),list,result));
+                pair.add(new CommentTarget(mergedComments.get(counter), list, result));
             } else {
                 quantityComments.add(mergedComments.get(counter));
                 quantityTargets.add(list);
@@ -107,9 +106,9 @@ public class FindComments extends AnAction {
         }
 
         //---------------------SPECIFICATION COMPLETED------------------------ -> HIGHLIGHTING OF COMMENTS
-        for(int i = 0; i<pair.size(); i++){
+        for (int i = 0; i < pair.size(); i++) {
             //if(i<=0)continue;
-            if(pair.get(i).getCoherenceCoeficient()>0.5){
+            if (pair.get(i).getCoherenceCoeficient() > 0.5) {
                 MainHighlighter.getInstance().highlight(qualityComments.get(i),
                         "High coherence with comment", 0, WarningType.ERROR);
                 highlightedComments.add(qualityComments.get(i));
@@ -121,9 +120,10 @@ public class FindComments extends AnAction {
             }
         }
         int statementsBountTogether = ConfigAccesser.getElement("max_statement_bound_together");
-        boolean noTarget = false;
+        //boolean noTarget = false;
         int commentWordCount;
         int statementCount;
+        SpecialStatementType specialStatement;// statements like for, lambda, anonymous class
         for (int i = 0; i < quantityComments.size(); i++) {
             if (Checker.checkIfCommentedOutCode(quantityComments.get(i))) {
                 MainHighlighter.getInstance().highlight(quantityComments.get(i),
@@ -131,25 +131,21 @@ public class FindComments extends AnAction {
                 highlightedComments.add(quantityComments.get(i));
             }
             //highlighting of comment target without statements
-            noTarget = Checker.checkIfNoTarget(quantityTargets.get(i));
-            if (noTarget) {
+            else if (Checker.checkIfNoTarget(quantityTargets.get(i))) {
                 MainHighlighter.getInstance().highlight(quantityComments.get(i),
                         "Comment has no target", 2, WarningType.ERROR);
                 highlightedComments.add(quantityComments.get(i));
             } else {
                 commentWordCount = Analyser.countWords(quantityComments.get(i));
                 statementCount = Analyser.countStatements(quantityTargets.get(i));
-                if (commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) {
+                specialStatement = Analyser.specialStatement(quantityTargets.get(i));
+                if ((commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) ||
+                        specialStatement != null) {
                     MainHighlighter.getInstance().highlight(quantityComments.get(i),
                             "Comment describes complex block, should be extracted", 1, WarningType.WARNING);
                     highlightedComments.add(quantityComments.get(i));
                 }
-
             }
-            noTarget = false;
         }
-
-
     }
-
 }

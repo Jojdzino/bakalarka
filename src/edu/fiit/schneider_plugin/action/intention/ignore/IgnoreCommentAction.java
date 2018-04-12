@@ -25,7 +25,8 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
         if (factory == null) factory = PsiElementFactory.SERVICE.getInstance(project);
         if (psiElement instanceof PsiWhiteSpace)
             psiElement = psiElement.getPrevSibling();
-
+        if (psiElement.getParent() instanceof PsiDocComment)
+            psiElement = psiElement.getParent();
         PsiComment newComment = factory.createCommentFromText(createIgnoredComment(psiElement.getText()), psiElement);
 
         PsiElement finalPsiElement = psiElement; // lambda expression must be final -> what...
@@ -39,8 +40,9 @@ public class IgnoreCommentAction extends PsiElementBaseIntentionAction implement
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) {
         if (psiElement instanceof PsiWhiteSpace && psiElement.getPrevSibling() instanceof PsiComment)
             psiElement = psiElement.getPrevSibling();
-
-        if (psiElement instanceof PsiDocComment) return false; //cant ignore javadoc, too important
+        if (psiElement.getParent() instanceof PsiDocComment)
+            psiElement = psiElement.getParent();
+        //if (psiElement instanceof PsiDocComment) return false; //cant ignore javadoc, too important
         if (psiElement.getText().contains("__I__"))
             return false;
         return true;

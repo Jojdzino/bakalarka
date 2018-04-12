@@ -38,11 +38,12 @@ class SelectionListener implements ListSelectionListener {
         assert file != null;
         FileEditorManager.getInstance(project).openEditor(new OpenFileDescriptor(project, file), true);
         RangeHighlighter selectedHighlighter = TableController.getRangeHighlighterList().get(selectedIndex);
-        //positioning selection
-        selectedEditor.getSelectionModel().setSelection(
-                selectedHighlighter.getStartOffset(),
-                selectedHighlighter.getEndOffset()
-        );
+        //positioning selection, might be null in realtime... need to check
+        if (selectedHighlighter.getStartOffset() != -1)
+            selectedEditor.getSelectionModel().setSelection(
+                    selectedHighlighter.getStartOffset(),
+                    selectedHighlighter.getEndOffset()
+            );
         //sets caret to endOffset of given highlighter and then transforms caret offset to logical position and scrolls to it
         selectedEditor.getCaretModel().moveToOffset(selectedHighlighter.getEndOffset());
         selectedEditor.getScrollingModel().scrollTo(selectedEditor.offsetToLogicalPosition(selectedEditor.getCaretModel().getOffset()),

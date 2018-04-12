@@ -16,7 +16,8 @@ public class HighlightingClearer {
         MarkupModel model = editor.getMarkupModel();
         model.removeAllHighlighters();
         //MainHighlighter.getInstance().getHighlights().remove(model.toString());
-        MainHighlighter.getInstance().getHighlighters().remove(model.toString()).clear();
+        if (MainHighlighter.getInstance().getHighlighters().containsKey(model.toString()))
+            MainHighlighter.getInstance().getHighlighters().remove(model.toString()).clear();
     }
 
     /**
@@ -39,7 +40,6 @@ public class HighlightingClearer {
         else return;
 
         model.removeHighlighter(targetOfRemoval);
-        //highlights.get(model.toString()).remove(targetOfRemoval);//removing from list
         highlighters.get(model.toString()).remove(specificKey);//removing from map by key
     }
 }

@@ -56,7 +56,7 @@ class TableController {
 
 
     private Object rowBetween(Document document, int startOffset) {
-        return document.getLineNumber(startOffset);
+        return document.getLineNumber(startOffset) + 1;
     }
 
     private List<RangeHighlighter> onlyFromLayer(List<RangeHighlighter> highlighters) {
@@ -112,5 +112,6 @@ class TableController {
             addIntoTable(objectList, rowCounter++, model);
         table.setModel(model);
         table.getColumnModel().getColumn(1).setMaxWidth(40);
+        table.getColumnModel().getColumn(2).setMinWidth(250);
     }
 }

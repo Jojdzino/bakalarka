@@ -7,9 +7,10 @@ import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.impl.source.PsiModifierListImpl;
 import com.intellij.psi.impl.source.PsiTypeElementImpl;
 import com.intellij.psi.impl.source.tree.java.PsiIdentifierImpl;
+import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl;
 import edu.fiit.schneider_plugin.algoritm.LevenshteinDistance;
 import edu.fiit.schneider_plugin.algoritm.StanfordLemmatizer;
-import edu.fiit.schneider_plugin.comment_util.RegExParser;
+import edu.fiit.schneider_plugin.comment_util.Parser;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
 import java.util.*;
@@ -32,7 +33,6 @@ public class CommentTarget {
                                  // after it is appended with modifierList words like private static and so on
     private float coherenceCoeficient;
     public final static String[] STOP_WORDS = {"the","a","an"};//SPECIAL should add more in future, list from net might not be so good as we might think
-
     public CommentTarget(List<PsiComment> comments, List<PsiElement> targets, int result) {
         //Prechadzaj komentare a vytvor string z ich slov
         // prechadzaj targety a ked najdes metodu alebo triedu alebo variable tak vytvor z nich slova
@@ -63,6 +63,7 @@ public class CommentTarget {
 
         //creating targetWordList, remove all short words that might break levenshtein
         this.targetWordList = Arrays.asList(currentString.split(" "));
+        this.targetWordList = Parser.specialCheck(this.targetWordList);
         List<String> newTargets = new LinkedList<>();
         for(String str:targetWordList)
             if(str.length()>2)newTargets.add((str.toLowerCase()));
@@ -75,16 +76,19 @@ public class CommentTarget {
             if(currentTarget.length()<=2)continue;
             for (String currentCommentLemma : lematisedList) {
                 if(currentCommentLemma.length()<=2)continue;
-                int distance = LevenshteinDistance.computeLevenshteinDistance(currentTarget.toLowerCase(), currentCommentLemma);
+                int distance = LevenshteinDistance.computeLevenshteinDistance(currentTarget.toLowerCase(), currentCommentLemma.toLowerCase());
                 if ( distance<= COHORENCE_CONSTANT)
                     wordSimilarityCounter++;
             }
         }
-
-        this.coherenceCoeficient = (float)wordSimilarityCounter/(float)targetWordList.size();
+        int lematisedLength = 0;
+        for (String str : lematisedList)
+            if (str.length() > 2)
+                lematisedLength++;
+        this.coherenceCoeficient = (float) wordSimilarityCounter / (float) lematisedLength;
     }
 
-    //Might not need this
+    //trim
     private String trim() {
         return mergedComment.replace("[\n\t<>{}]"," ");
     }
@@ -108,8 +112,8 @@ public class CommentTarget {
                 }
                 if (actual.getClass() == PsiIdentifierImpl.class) {
                     if (ConfigAccesser.getElement("snake_case") == 0)
-                        builder.append(arrToString(RegExParser.camelCaseSplitter(actual.getText())));
-                    else builder.append(arrToString(RegExParser.snakeCaseSplitter(actual.getText())));
+                        builder.append(arrToString(Parser.camelCaseSplitter(actual.getText())));
+                    else builder.append(arrToString(Parser.snakeCaseSplitter(actual.getText())));
                 }
             }
         }
@@ -144,8 +148,8 @@ public class CommentTarget {
                 modifierList.addAll(Arrays.asList(actual.getText().split("[^A-Za-z0-9]")));//Split by non alphanumeric
             if(actual.getClass() == PsiIdentifierImpl.class){
                 if(ConfigAccesser.getElement("snake_case")==0)
-                    builder.append(arrToString(RegExParser.camelCaseSplitter(actual.getText())));
-                else builder.append(arrToString(RegExParser.snakeCaseSplitter(actual.getText())));
+                    builder.append(arrToString(Parser.camelCaseSplitter(actual.getText())));
+                else builder.append(arrToString(Parser.snakeCaseSplitter(actual.getText())));
             }
         }
         this.currentString =builder.toString();
@@ -156,9 +160,15 @@ public class CommentTarget {
         PsiElement help;
         StringBuilder builder = new StringBuilder();
         String methodName;
-
         PsiElement[] array= main.getChildren();
-
+        PsiElement[] newArray = null;
+        for (PsiElement element : array) {
+            if (element.getClass() == PsiLocalVariableImpl.class) {
+                newArray = element.getChildren();
+            }
+        }
+        if (newArray != null)
+            array = newArray;
         for(int i = 0; i < array.length-1;i++) {
             PsiElement actual = array[i];
             if (actual.getClass() == PsiModifierListImpl.class)
@@ -167,8 +177,8 @@ public class CommentTarget {
                 modifierList.addAll(Arrays.asList(actual.getText().split("[^A-Za-z0-9]")));//Split by non alphanumeric
             if(actual.getClass() == PsiIdentifierImpl.class){
                 if(ConfigAccesser.getElement("snake_case")==0)
-                    builder.append(arrToString(RegExParser.camelCaseSplitter(actual.getText())));
-                else builder.append(arrToString(RegExParser.snakeCaseSplitter(actual.getText())));
+                    builder.append(arrToString(Parser.camelCaseSplitter(actual.getText())));
+                else builder.append(arrToString(Parser.snakeCaseSplitter(actual.getText())));
             }
         }
         this.currentString =builder.toString();

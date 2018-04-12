@@ -1,9 +1,7 @@
 package edu.fiit.schneider_plugin.comment_util;
 
-import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaToken;
-import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.*;
+import edu.fiit.schneider_plugin.entity.SpecialStatementType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,5 +28,17 @@ public class Analyser {
                 counter++;
         }
         return counter;
+    }
+
+    public static SpecialStatementType specialStatement(List<PsiElement> psiElements) {
+        for (PsiElement element : psiElements) {
+            if (element instanceof PsiLambdaExpression)
+                return SpecialStatementType.LAMBDA;
+            if (element instanceof PsiForStatement || element instanceof PsiForeachStatement)
+                return SpecialStatementType.FOR;
+            if (element instanceof PsiAnonymousClass)
+                return SpecialStatementType.ANONYMOUS;
+        }
+        return null;
     }
 }
