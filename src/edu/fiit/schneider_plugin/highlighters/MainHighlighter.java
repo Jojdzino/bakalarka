@@ -11,7 +11,6 @@ import com.intellij.psi.PsiElement;
 import edu.fiit.schneider_plugin.entity.WarningType;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
 
 /**
@@ -20,19 +19,19 @@ import java.util.List;
 @SuppressWarnings({"UseJBColor", "WeakerAccess", "Duplicates"})
 public class MainHighlighter {
 
-    private Map<String, Map<String, RangeHighlighter>> highlighters;
-    private static MainHighlighter instance = null;
+//    private Map<String, Map<String, RangeHighlighter>> highlighters;
+//    private static MainHighlighter instance = null;
+//
+//    public static MainHighlighter getInstance() {
+//        if (instance == null) {
+//            instance = new MainHighlighter();
+//        }
+//        return instance;
+//    }
 
-    public static MainHighlighter getInstance() {
-        if (instance == null) {
-            instance = new MainHighlighter();
-        }
-        return instance;
-    }
-
-    private MainHighlighter() {
-        highlighters = new HashMap<>();
-    }
+//    private MainHighlighter() {
+//        highlighters = new HashMap<>();
+//    }
 
     private static void highlight(TextAttributes textAttributes, Color color) {
         textAttributes.setBackgroundColor(color);
@@ -46,7 +45,7 @@ public class MainHighlighter {
     }
 
     public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, WarningType warningType, Editor editor) {
-        TextAttributes attributes = ElementTextAtributesCreator.createContrastTextAttributes(warningType);
+        TextAttributes attributes = ElementTextAttributesCreator.createContrastTextAttributes(warningType);
 
         return editor.getMarkupModel().addRangeHighlighter(
                 fromLine, toLine, 3333, attributes, HighlighterTargetArea.EXACT_RANGE);
@@ -61,7 +60,7 @@ public class MainHighlighter {
      * @param errorCode codes with problem representation : 0-coherence, 1- target extraction, 2- comment has no target,
      *                  3- other highlighting for comments
      */
-    public void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
+    public static void highlight(List<? extends PsiElement> psiElements, String problem, int errorCode, WarningType warning) {
         RangeHighlighter rangeHighlighter;
         int fromOffset = getFromOffset(psiElements);
         int toOffset = getToOffset(psiElements);
@@ -72,50 +71,50 @@ public class MainHighlighter {
                 case 0://quality comment
                     switch (warning) {
                         case INFO:
-                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.INFO_BACKGROUND,
+                            rangeHighlighter = highlightLines(ElementTextAttributesCreator.INFO_BACKGROUND,
                                     fromOffset, toOffset, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.INFO_BACKGROUND,
+                            highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.INFO_BACKGROUND,
                                     "Problem :\n" + problem);
                             break;
 
                         case WARNING:
-                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND,
+                            rangeHighlighter = highlightLines(ElementTextAttributesCreator.WARNING_BACKGROUND,
                                     fromOffset, toOffset, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND,
+                            highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.WARNING_BACKGROUND,
                                     "Problem :\n" + problem);
                             break;
 
                         case ERROR:
-                            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND,
+                            rangeHighlighter = highlightLines(ElementTextAttributesCreator.ERROR_BACKGROUND,
                                     fromOffset, toOffset, editor, warning);
-                            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                            highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.ERROR_BACKGROUND,
                                     "Problem :\n" + problem);
                     }
                     break;
                 case 1://comment with no target
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.WARNING_BACKGROUND, fromOffset,
+                    rangeHighlighter = highlightLines(ElementTextAttributesCreator.WARNING_BACKGROUND, fromOffset,
                             toOffset, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.WARNING_BACKGROUND,
+                    highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.WARNING_BACKGROUND,
                             "Problem :\n" + problem);
                     break;
 
                 case 2://comment has no target
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromOffset,
+                    rangeHighlighter = highlightLines(ElementTextAttributesCreator.ERROR_BACKGROUND, fromOffset,
                             toOffset, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                    highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.ERROR_BACKGROUND,
                             "Problem :\n" + problem);
                     break;
 
                 case 3://other highlighting
-                    rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.ERROR_BACKGROUND, fromOffset,
+                    rangeHighlighter = highlightLines(ElementTextAttributesCreator.ERROR_BACKGROUND, fromOffset,
                             toOffset, editor, warning);
-                    highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.ERROR_BACKGROUND,
+                    highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.ERROR_BACKGROUND,
                             "Problem :\n" + problem);
             }
         } else if (warning == WarningType.TARGET) {
-            rangeHighlighter = this.highlightLines(ElementTextAtributesCreator.TARGET_BACKGROUND,
+            rangeHighlighter = highlightLines(ElementTextAttributesCreator.TARGET_BACKGROUND,
                     fromOffset, toOffset, editor, warning);
-            highlightErrorStripe(rangeHighlighter, ElementTextAtributesCreator.TARGET_BACKGROUND,
+            highlightErrorStripe(rangeHighlighter, ElementTextAttributesCreator.TARGET_BACKGROUND,
                     "Target of comment");
 
         }
@@ -129,7 +128,7 @@ public class MainHighlighter {
      * @param toOffset   line to highlight to, indexed as in IDEA
      * @param editor   editor to highlight in
      */
-    public RangeHighlighter highlightLines(final Color color, int fromOffset, int toOffset, Editor editor, WarningType warning) {
+    public static RangeHighlighter highlightLines(final Color color, int fromOffset, int toOffset, Editor editor, WarningType warning) {
         Document document = editor.getDocument();
         SideHighlighter sideHighlighter = new SideHighlighter();
 
@@ -146,37 +145,37 @@ public class MainHighlighter {
             sideHighlighter.highlight(highlighter, color);
 
             //setting specific highlighter to specific lines
-            createTreeMap(editor);
-            highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
+            //createTreeMap(editor);
+            //highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
             return highlighter;
         }
         return null;
     }
 
-    private void createTreeMap(Editor editor) {
-        if (!highlighters.containsKey(editor.getMarkupModel().toString()))
-            highlighters.put(editor.getMarkupModel().toString(), new TreeMap<>((first, second) -> {
-                int first1 = Integer.parseInt(first.split(" ")[0]);
-                int first2 = Integer.parseInt(first.split(" ")[0]);
-                int second1 = Integer.parseInt(second.split(" ")[0]);
-                int second2 = Integer.parseInt(second.split(" ")[1]);
-                if (first1 == first2 && second1 == second2) {
-                    return Integer.compare(first1, second1);
-                }
-                int dif1 = Math.abs(first1 - second1);
-                int dif2 = Math.abs(first2 - second2);
-                if (dif1 == dif2)
-                    return Integer.compare(dif1, dif2);
-                return first.hashCode() - second.hashCode();
-            }));
-    }
+//    private void createTreeMap(Editor editor) {
+//        if (!highlighters.containsKey(editor.getMarkupModel().toString()))
+//            highlighters.put(editor.getMarkupModel().toString(), new TreeMap<>((first, second) -> {
+//                int first1 = Integer.parseInt(first.split(" ")[0]);
+//                int first2 = Integer.parseInt(first.split(" ")[0]);
+//                int second1 = Integer.parseInt(second.split(" ")[0]);
+//                int second2 = Integer.parseInt(second.split(" ")[1]);
+//                if (first1 == first2 && second1 == second2) {
+//                    return Integer.compare(first1, second1);
+//                }
+//                int dif1 = Math.abs(first1 - second1);
+//                int dif2 = Math.abs(first2 - second2);
+//                if (dif1 == dif2)
+//                    return Integer.compare(dif1, dif2);
+//                return first.hashCode() - second.hashCode();
+//            }));
+//    }
 
     /**
      * Return lineNumber of last element in list
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public int getToOffset(List<? extends PsiElement> psiElements) {
+    public static int getToOffset(List<? extends PsiElement> psiElements) {
         int toOffset;
         PsiElement lastChild;
         if (psiElements.size() == 1) {
@@ -198,9 +197,9 @@ public class MainHighlighter {
         return toOffset;
     }
 
-    public Map<String, Map<String, RangeHighlighter>> getHighlighters() {
-        return highlighters;
-    }
+//    public Map<String, Map<String, RangeHighlighter>> getHighlighters() {
+//        return highlighters;
+//    }
 
     /**
      * Returns last child of given element, recursive
@@ -208,7 +207,7 @@ public class MainHighlighter {
      * @param element element ot get last child from
      * @return last child of element, or element if if has no children
      */
-    public PsiElement getLastChild(PsiElement element) {
+    public static PsiElement getLastChild(PsiElement element) {
         if (element.getChildren().length == 0) return element;
         else return getLastChild(element.getLastChild());
     }
@@ -218,7 +217,7 @@ public class MainHighlighter {
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public int getFromOffset(List<? extends PsiElement> psiElements) {
+    public static int getFromOffset(List<? extends PsiElement> psiElements) {
         int fromOffset;
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
@@ -236,9 +235,9 @@ public class MainHighlighter {
         return fromOffset;
     }
 
-    public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
-        Map<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
-        if (x == null) return null;
-        return new ArrayList<>(x.values());
-    }
+//    public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
+//        Map<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
+//        if (x == null) return null;
+//        return new ArrayList<>(x.values());
+//    }
 }

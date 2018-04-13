@@ -4,8 +4,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 
-import java.util.Map;
-
+@SuppressWarnings("Duplicates")
 public class HighlightingClearer {
     /**
      * Clears given editor of all highlighting.
@@ -15,31 +14,31 @@ public class HighlightingClearer {
     public static void clear(Editor editor) {
         MarkupModel model = editor.getMarkupModel();
         model.removeAllHighlighters();
-        //MainHighlighter.getInstance().getHighlights().remove(model.toString());
-        if (MainHighlighter.getInstance().getHighlighters().containsKey(model.toString()))
-            MainHighlighter.getInstance().getHighlighters().remove(model.toString()).clear();
+    }
+
+    public static void clearSpecificHighlight(Editor editor, int highlightedIndex) {
+        MarkupModel model = editor.getMarkupModel();
+        RangeHighlighter[] highlighters = model.getAllHighlighters();
+        RangeHighlighter specificHighlighter = getHighlighter(highlighters, highlightedIndex);
+        if (specificHighlighter != null)
+            model.removeHighlighter(specificHighlighter);
     }
 
     /**
-     * Clears highlighting in selected editor based on given lines. Removes highlighting between those lines, including them.
+     * Returns highlighter at specified index of selected editor.
      *
-     * @param editor   editor to search for highlighting
-     * @param fromLine first line of highlighting targets, indexed as in IDEA, included
-     * @param toLine   last line of highlighting targets, indexed as in IDEA, included
+     * @param highlighters     highlighters frmo editor
+     * @param highlightedIndex index that is highlighted
+     * @return highlighter that highlights specified index
      */
-    public static void clearSpecificHighlight(Editor editor, int fromLine, int toLine) {
-        MarkupModel model = editor.getMarkupModel();
-        Map<String, Map<String, RangeHighlighter>> highlighters =
-                MainHighlighter.getInstance().getHighlighters();
-        //Hashtable<String, List<RangeHighlighter>> highlights = MainHighlighter.getInstance().getHighlights();
-
-        String specificKey = String.valueOf(fromLine) + " " + String.valueOf(toLine);
-        RangeHighlighter targetOfRemoval;
-        if (highlighters.containsKey(model.toString()))
-            targetOfRemoval = highlighters.get(model.toString()).get(specificKey);
-        else return;
-
-        model.removeHighlighter(targetOfRemoval);
-        highlighters.get(model.toString()).remove(specificKey);//removing from map by key
+    private static RangeHighlighter getHighlighter(RangeHighlighter[] highlighters, int highlightedIndex) {
+        int from, to;
+        for (RangeHighlighter highlighter : highlighters) {
+            from = highlighter.getStartOffset();
+            to = highlighter.getStartOffset();
+            if (from >= highlightedIndex && highlightedIndex <= to)
+                return highlighter;
+        }
+        return null;
     }
 }

@@ -54,7 +54,7 @@
             <descriptionDirectoryName>ShowTargetAction</descriptionDirectoryName>
         </intentionAction>
 
-        <toolWindow id="CommentFixer menu" anchor="top" factoryClass="edu.fiit.schneider_plugin.window.Window"/>
+        <toolWindow id="Tabbed pane" anchor="top" factoryClass="edu.fiit.schneider_plugin.window.Window"/>
 
     </extensions>
 

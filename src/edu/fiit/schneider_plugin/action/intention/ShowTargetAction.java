@@ -26,7 +26,7 @@ public class ShowTargetAction extends PsiElementBaseIntentionAction implements I
         if (commentList == null)
             return;
         List<PsiElement> targets = Extractor.extractTargets(commentList.get(commentList.size() - 1));
-        MainHighlighter.getInstance().highlight(targets, "Target of\n ' " + targets.toString() + " '",
+        MainHighlighter.highlight(targets, "Target of\n ' " + targets.toString() + " '",
                 3, WarningType.TARGET);
 
     }

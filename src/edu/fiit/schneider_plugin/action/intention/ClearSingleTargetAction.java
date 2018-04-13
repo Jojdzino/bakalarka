@@ -46,12 +46,12 @@ public class ClearSingleTargetAction extends PsiElementBaseIntentionAction imple
         if (groupOfComments == null) return;
 
         int textOffset = groupOfComments.get(0).getTextOffset();
-        fromLine = document.getLineNumber(textOffset);
-        PsiElement lastElement = groupOfComments.get(groupOfComments.size() - 1);
-        textOffset = lastElement.getTextOffset() + lastElement.getText().length();
-        toLine = document.getLineNumber(textOffset);
+//        fromLine = document.getLineNumber(textOffset);
+//        PsiElement lastElement = groupOfComments.get(groupOfComments.size() - 1);
+//        textOffset = lastElement.getTextOffset() + lastElement.getText().length();
+//        toLine = document.getLineNumber(textOffset);
 
-        HighlightingClearer.clearSpecificHighlight(editor, fromLine, toLine);
+        HighlightingClearer.clearSpecificHighlight(editor, textOffset);
     }
 
     @Override

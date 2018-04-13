@@ -9,7 +9,7 @@ import java.awt.*;
  * Second is color of which background should be.
  */
 @SuppressWarnings("UseJBColor")
-class MyTableCellRender extends DefaultTableCellRenderer {
+public class MyTableCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         MyTableModel model = (MyTableModel) table.getModel();
         this.setOpaque(true);

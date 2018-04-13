@@ -33,7 +33,6 @@ public class FindComments extends AnAction {
     public static List<PsiComment> removeList(PsiElement element) {
         int i, j;
         boolean abort = false;
-        List<PsiElement> targetList = null;
         for (i = 0; i < highlightedComments.size(); i++) {
             for (j = 0; j < highlightedComments.get(i).size(); j++)
                 if (highlightedComments.get(i).get(j) == element) {
@@ -54,11 +53,6 @@ public class FindComments extends AnAction {
             }
         }
         return null;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static List<List<PsiComment>> getHighlightedComments() {
-        return highlightedComments;
     }
 
     static void clearHighlighterComments() {
@@ -109,12 +103,12 @@ public class FindComments extends AnAction {
         for (int i = 0; i < pair.size(); i++) {
             //if(i<=0)continue;
             if (pair.get(i).getCoherenceCoeficient() > 0.5) {
-                MainHighlighter.getInstance().highlight(qualityComments.get(i),
+                MainHighlighter.highlight(qualityComments.get(i),
                         "High coherence with comment", 0, WarningType.ERROR);
                 highlightedComments.add(qualityComments.get(i));
             }
             if (pair.get(i).getCoherenceCoeficient() > 0.3 && pair.get(i).getCoherenceCoeficient() <= 0.5) {
-                MainHighlighter.getInstance().highlight(qualityComments.get(i),
+                MainHighlighter.highlight(qualityComments.get(i),
                         "Medium coherence with comment", 0, WarningType.WARNING);
                 highlightedComments.add(qualityComments.get(i));
             }
@@ -126,13 +120,13 @@ public class FindComments extends AnAction {
         SpecialStatementType specialStatement;// statements like for, lambda, anonymous class
         for (int i = 0; i < quantityComments.size(); i++) {
             if (Checker.checkIfCommentedOutCode(quantityComments.get(i))) {
-                MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                MainHighlighter.highlight(quantityComments.get(i),
                         "Commented out code", 3, WarningType.ERROR);
                 highlightedComments.add(quantityComments.get(i));
             }
             //highlighting of comment target without statements
             else if (Checker.checkIfNoTarget(quantityTargets.get(i))) {
-                MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                MainHighlighter.highlight(quantityComments.get(i),
                         "Comment has no target", 2, WarningType.ERROR);
                 highlightedComments.add(quantityComments.get(i));
             } else {
@@ -141,7 +135,7 @@ public class FindComments extends AnAction {
                 specialStatement = Analyser.specialStatement(quantityTargets.get(i));
                 if ((commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) ||
                         specialStatement != null) {
-                    MainHighlighter.getInstance().highlight(quantityComments.get(i),
+                    MainHighlighter.highlight(quantityComments.get(i),
                             "Comment describes complex block, should be extracted", 1, WarningType.WARNING);
                     highlightedComments.add(quantityComments.get(i));
                 }

@@ -23,10 +23,7 @@ public class DeleteCommentAction extends PsiElementBaseIntentionAction implement
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
         if (!isAvailable(project, editor, psiElement)) return;
         //removing highlighting
-        int fromLine, toLine;
-        fromLine = editor.getDocument().getLineNumber(psiElement.getTextOffset());
-        toLine = editor.getDocument().getLineNumber(psiElement.getTextOffset() + psiElement.getTextLength());
-        HighlightingClearer.clearSpecificHighlight(editor, fromLine, toLine);
+        HighlightingClearer.clearSpecificHighlight(editor, psiElement.getTextOffset());
         //deleting PsiElements
         List<PsiComment> list = FindComments.getHighlightedComments(psiElement);
         assert list != null;//this is decided by isAvailable function

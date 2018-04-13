@@ -1,30 +1,25 @@
 package edu.fiit.schneider_plugin.window;
 
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
-import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
+public
 //nullPointerException in some cases, but that shouldnt be a problem
 class TableController {
 
     private static List<Editor> editorList = null;
-    private static List<RangeHighlighter> rangeHighlighterList = null;//they will be in the same order as the table is orderer
+    private static List<RangeHighlighter> rangeHighlighterList = null;//editors that
 
-    private Editor getEditorAtRow(int row) {
-        return editorList.get(row);
-    }
-
-    void clearTable(JTable table) {
+    public void clearTable(JTable table) {
         DefaultTableModel dm = (DefaultTableModel) table.getModel();
         int rowCount = dm.getRowCount();
         for (int i = rowCount - 1; i >= 0; i--) {
@@ -54,11 +49,6 @@ class TableController {
         return columnNames;
     }
 
-
-    private Object rowBetween(Document document, int startOffset) {
-        return document.getLineNumber(startOffset) + 1;
-    }
-
     private List<RangeHighlighter> onlyFromLayer(List<RangeHighlighter> highlighters) {
         List<RangeHighlighter> pomList = new ArrayList<>();
         for (RangeHighlighter highlighter : highlighters)
@@ -67,7 +57,6 @@ class TableController {
         return pomList;
     }
 
-    //rozbije meno editoru, dufam ze tam bude meno suboru ktory je otvorney,ak nie tak to bude dokument
     private String parseEditorName(String editorName) {
         String[] arr = editorName.split("/");
         return arr[arr.length - 1].split("]")[0];
@@ -79,7 +68,7 @@ class TableController {
     }
 
     //1 -> editor string name, 2. -> row of error, 3. -> problem string, 4. -> color of highlighting (not in table)
-    void updateTable(JTable table) {
+    public void updateTable(JTable table) {
         int rowCounter = 0;
         //int rowActual=10;
         MyTableModel model = new MyTableModel(createColumnVector(), 0);
@@ -91,16 +80,16 @@ class TableController {
         Editor[] editors = EditorFactory.getInstance().getAllEditors();
 
         for (Editor editor : editors) {
-            List<RangeHighlighter> highlighters = MainHighlighter.getInstance().getHighlightersByEditor(editor);
+            List<RangeHighlighter> highlighters = getAllHighlightersFromMyLayer(editor);
             if (highlighters == null) continue;
             highlighters = onlyFromLayer(highlighters);
             if (highlighters.size() == 0) continue;
             rangeHighlighterList.addAll(highlighters);
-
+            highlighters.sort(Comparator.comparingInt(RangeMarker::getStartOffset));
             for (RangeHighlighter highlighter : highlighters) {
                 List<Object> row = new ArrayList<>();
                 row.add(parseEditorName(editor.getDocument().toString()));
-                row.add(rowBetween(editor.getDocument(), highlighter.getStartOffset()));
+                row.add(editor.getDocument().getLineNumber(highlighter.getStartOffset()));
                 row.add(highlighter.getErrorStripeTooltip());
                 row.add(highlighter.getTextAttributes().getBackgroundColor());
                 tableContent.add(row);
@@ -113,5 +102,12 @@ class TableController {
         table.setModel(model);
         table.getColumnModel().getColumn(1).setMaxWidth(40);
         table.getColumnModel().getColumn(2).setMinWidth(250);
+    }
+
+    private List<RangeHighlighter> getAllHighlightersFromMyLayer(Editor editor) {
+        List<RangeHighlighter> highlighters = new ArrayList<>();
+        highlighters.addAll(Arrays.asList(editor.getMarkupModel().getAllHighlighters()));
+        highlighters.removeIf(highlighter -> highlighter.getLayer() != 3333);
+        return highlighters;
     }
 }

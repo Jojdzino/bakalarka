@@ -8,7 +8,7 @@ import java.awt.*;
 
 
 @SuppressWarnings({"UseJBColor", "WeakerAccess"})
-class ElementTextAtributesCreator {
+class ElementTextAttributesCreator {
 
     static final Color TARGET_BACKGROUND = new Color(156, 203, 206);
     static final Color TARGET_EFFECT = new Color(5, 122, 33);

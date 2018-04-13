@@ -1,12 +1,12 @@
-package edu.fiit.schneider_plugin.window;
+package edu.fiit.schneider_plugin;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.markup.RangeHighlighter;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import edu.fiit.schneider_plugin.window.MyTableCellRenderer;
+import edu.fiit.schneider_plugin.window.SelectionListener;
+import edu.fiit.schneider_plugin.window.TableController;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -14,9 +14,6 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 public class CommentFixerFormMenu {
 
@@ -29,7 +26,6 @@ public class CommentFixerFormMenu {
     private JPanel editor;
     private JPanel config;
     private JButton refreshTableButton;
-    private static Project project;
     private int statementsBoundTogether = 5;
     private TableColumn editorColumn = new TableColumn();
     private TableColumn errorColumn = new TableColumn();
@@ -37,7 +33,6 @@ public class CommentFixerFormMenu {
     private TableController tableController = new TableController();
 
     static {
-        project = ProjectManager.getInstance().getOpenProjects()[0];
     }
 
     {
@@ -45,7 +40,7 @@ public class CommentFixerFormMenu {
     }
 
     //sets current variable of comment length to user input and saves it into file
-    CommentFixerFormMenu() {
+    public CommentFixerFormMenu() {
         addConfigListeners();
         initJTable();
         tabbedPane1.addMouseListener(new MouseAdapter() {
@@ -54,17 +49,28 @@ public class CommentFixerFormMenu {
                 refreshTable();
             }
         });
-
     }
 
+
     private void refreshTable() {
-        tableController.clearTable(editorToWarningTypeEntryTable);
-        tableController.updateTable(editorToWarningTypeEntryTable);
+        if (editorToWarningTypeEntryTable.getRowCount() != highlighterCount()) {
+            tableController.clearTable(editorToWarningTypeEntryTable);
+            tableController.updateTable(editorToWarningTypeEntryTable);
+        }
+    }
+
+    private int highlighterCount() {
+        int count = 0;
+        for (Editor editor : EditorFactory.getInstance().getAllEditors())
+            for (RangeHighlighter highlighter : editor.getMarkupModel().getAllHighlighters())
+                if (highlighter.getLayer() == 3333)
+                    count++;
+        return count;
     }
 
 
     private void initJTable() {
-        editorToWarningTypeEntryTable.setDefaultRenderer(Object.class, new MyTableCellRender());
+        editorToWarningTypeEntryTable.setDefaultRenderer(Object.class, new MyTableCellRenderer());
         //editorToWarningTypeEntryTable.setModel(new MyTableModel());
         editorColumn.setHeaderValue("Editor");
         editorToWarningTypeEntryTable.addColumn(editorColumn);
@@ -76,51 +82,19 @@ public class CommentFixerFormMenu {
                 new SelectionListener());
     }
 
-
-    //Checks if file is missing, if yes thats ok, if not reads it and sets values
-    private void checkIfConfigMissing() {
-        SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File(project.getBaseDir().getPath() + "/.idea/commentFixerConfig.xml");
-        if (!xmlFile.exists())
-            return;
-        try {
-            Document document = builder.build(xmlFile);
-            Element rootNode = document.getRootElement();
-            List<Element> nodeList = rootNode.getChildren("CONFIGURATION");
-
-            for (Element aNodeList : nodeList) {
-                //add other values to read
-                statementsBoundTogether = Integer.parseInt(aNodeList.getChildText("max_statement_bound_together"));
-            }
-
-        } catch (JDOMException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void addConfigListeners() {
         statementBoundTogetherButton.addActionListener(e -> {
-            //checkIfConfigMissing();
-
             int userInputStatementBoundTogether = Integer.parseInt(textField1.getText());
             if (userInputStatementBoundTogether < 1 || userInputStatementBoundTogether > 10) {
                 statementsBoundTogether = 10;
             } else statementsBoundTogether = userInputStatementBoundTogether;
-            try {
-                ConfigAccesser.setElement(statementsBoundTogether, "max_statement_bound_together");
-            } catch (IOException | JDOMException e1) {
-                e1.printStackTrace();
-            }
+            ConfigAccesser.setElement(statementsBoundTogether, "max_statement_bound_together");
         });
         snakeCaseCheckBox.addItemListener(e -> {
-            try {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    ConfigAccesser.setElement(1, "snake_case");
-                } else {
-                    ConfigAccesser.setElement(0, "snake_case");
-                }
-            } catch (JDOMException | IOException el) {
-                el.printStackTrace();
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                ConfigAccesser.setElement(1, "snake_case");
+            } else {
+                ConfigAccesser.setElement(0, "snake_case");
             }
         });
         refreshTableButton.addMouseListener(new MouseAdapter() {
@@ -131,8 +105,7 @@ public class CommentFixerFormMenu {
         });
     }
 
-    JPanel getPanel1() {
+    public JPanel getPanel1() {
         return panel;
     }
-
 }

@@ -46,12 +46,10 @@ public class Checker {
     static boolean checkIfCodeInLine(PsiComment root) {
 
         PsiElement prevSibling = root.getPrevSibling();
-        int isNeighbor;
         boolean semicolonInSameLine = false;
         boolean newLine = false;
-        if (prevSibling != null) {
-            isNeighbor = 1;
-        } else return false;
+        if (prevSibling == null)
+            return false;
 
         while (true) {
 
@@ -67,7 +65,6 @@ public class Checker {
             if (prevSibling.getClass() == PsiJavaTokenImpl.class && prevSibling.toString().endsWith("SEMICOLON"))
                 semicolonInSameLine = true;
 
-            isNeighbor++;
             prevSibling = prevSibling.getPrevSibling();
             if (newLine && !semicolonInSameLine)
                 return false;
