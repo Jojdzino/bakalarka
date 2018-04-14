@@ -1,12 +1,9 @@
-package edu.fiit.schneider_plugin;
+package edu.fiit.schneider_plugin.window;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
-import edu.fiit.schneider_plugin.window.MyTableCellRenderer;
-import edu.fiit.schneider_plugin.window.SelectionListener;
-import edu.fiit.schneider_plugin.window.TableController;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -49,6 +46,7 @@ public class CommentFixerFormMenu {
                 refreshTable();
             }
         });
+        tabbedPane1.addChangeListener(e -> refreshTable());
     }
 
 

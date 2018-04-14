@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import edu.fiit.schneider_plugin.highlighters.HighlightingClearer;
+import edu.fiit.schneider_plugin.startup.CodeChangeListener;
+
 //clears target
 public class ClearTargets extends AnAction {
     @Override
@@ -12,5 +14,6 @@ public class ClearTargets extends AnAction {
         Editor editor = anActionEvent.getRequiredData(CommonDataKeys.EDITOR);
         HighlightingClearer.clear(editor);
         FindComments.clearHighlighterComments();
+        CodeChangeListener.updateTable();
     }
 }

@@ -16,9 +16,10 @@ import edu.fiit.schneider_plugin.comment_util.Extractor;
 import edu.fiit.schneider_plugin.comment_util.Transformer;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 import edu.fiit.schneider_plugin.entity.CommentTarget;
-import edu.fiit.schneider_plugin.entity.SpecialStatementType;
-import edu.fiit.schneider_plugin.entity.WarningType;
+import edu.fiit.schneider_plugin.entity.enums.SpecialStatementType;
+import edu.fiit.schneider_plugin.entity.enums.WarningType;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
+import edu.fiit.schneider_plugin.startup.CodeChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,12 +103,12 @@ public class FindComments extends AnAction {
         //---------------------SPECIFICATION COMPLETED------------------------ -> HIGHLIGHTING OF COMMENTS
         for (int i = 0; i < pair.size(); i++) {
             //if(i<=0)continue;
-            if (pair.get(i).getCoherenceCoeficient() > 0.5) {
+            if (pair.get(i).getCoherenceCoefficient() > 0.5) {
                 MainHighlighter.highlight(qualityComments.get(i),
                         "High coherence with comment", 0, WarningType.ERROR);
                 highlightedComments.add(qualityComments.get(i));
             }
-            if (pair.get(i).getCoherenceCoeficient() > 0.3 && pair.get(i).getCoherenceCoeficient() <= 0.5) {
+            if (pair.get(i).getCoherenceCoefficient() > 0.3 && pair.get(i).getCoherenceCoefficient() <= 0.5) {
                 MainHighlighter.highlight(qualityComments.get(i),
                         "Medium coherence with comment", 0, WarningType.WARNING);
                 highlightedComments.add(qualityComments.get(i));
@@ -141,5 +142,6 @@ public class FindComments extends AnAction {
                 }
             }
         }
+        CodeChangeListener.updateTable();//update table if there was change
     }
 }

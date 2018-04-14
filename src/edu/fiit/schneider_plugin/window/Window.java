@@ -3,7 +3,6 @@ package edu.fiit.schneider_plugin.window;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import edu.fiit.schneider_plugin.CommentFixerFormMenu;
 import org.jetbrains.annotations.NotNull;
 
 public class Window implements ToolWindowFactory {

@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
-import edu.fiit.schneider_plugin.entity.WarningType;
+import edu.fiit.schneider_plugin.entity.enums.WarningType;
 
 import java.awt.*;
 import java.util.List;
@@ -16,35 +16,21 @@ import java.util.List;
 /**
  * Inspired from https://github.com/xcegin/PUTVT
  */
-@SuppressWarnings({"UseJBColor", "WeakerAccess", "Duplicates"})
+@SuppressWarnings({"UseJBColor"})
 public class MainHighlighter {
-
-//    private Map<String, Map<String, RangeHighlighter>> highlighters;
-//    private static MainHighlighter instance = null;
-//
-//    public static MainHighlighter getInstance() {
-//        if (instance == null) {
-//            instance = new MainHighlighter();
-//        }
-//        return instance;
-//    }
-
-//    private MainHighlighter() {
-//        highlighters = new HashMap<>();
-//    }
 
     private static void highlight(TextAttributes textAttributes, Color color) {
         textAttributes.setBackgroundColor(color);
     }
 
-    public static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String problem) {
+    private static void highlightErrorStripe(RangeHighlighter rangeHighlighter, Color color, String problem) {
         if (problem != null) {
             rangeHighlighter.setErrorStripeMarkColor(color);
             rangeHighlighter.setErrorStripeTooltip(problem);
         }
     }
 
-    public static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, WarningType warningType, Editor editor) {
+    private static RangeHighlighter createRangeHighlighter(int fromLine, int toLine, WarningType warningType, Editor editor) {
         TextAttributes attributes = ElementTextAttributesCreator.createContrastTextAttributes(warningType);
 
         return editor.getMarkupModel().addRangeHighlighter(
@@ -128,7 +114,7 @@ public class MainHighlighter {
      * @param toOffset   line to highlight to, indexed as in IDEA
      * @param editor   editor to highlight in
      */
-    public static RangeHighlighter highlightLines(final Color color, int fromOffset, int toOffset, Editor editor, WarningType warning) {
+    private static RangeHighlighter highlightLines(final Color color, int fromOffset, int toOffset, Editor editor, WarningType warning) {
         Document document = editor.getDocument();
         SideHighlighter sideHighlighter = new SideHighlighter();
 
@@ -138,44 +124,19 @@ public class MainHighlighter {
             RangeHighlighter highlighter = createRangeHighlighter(fromOffset, toOffset, warning, editor);
 
             highlight(attributes, color);
-            //map has keys from and toLine
-            int fromLine = editor.getDocument().getLineNumber(fromOffset);
-            int toLine = editor.getDocument().getLineNumber(toOffset);
-            String fromToString = String.valueOf(fromLine) + " " + String.valueOf(toLine);
             sideHighlighter.highlight(highlighter, color);
 
-            //setting specific highlighter to specific lines
-            //createTreeMap(editor);
-            //highlighters.get(editor.getMarkupModel().toString()).put(fromToString, highlighter);
             return highlighter;
         }
         return null;
     }
-
-//    private void createTreeMap(Editor editor) {
-//        if (!highlighters.containsKey(editor.getMarkupModel().toString()))
-//            highlighters.put(editor.getMarkupModel().toString(), new TreeMap<>((first, second) -> {
-//                int first1 = Integer.parseInt(first.split(" ")[0]);
-//                int first2 = Integer.parseInt(first.split(" ")[0]);
-//                int second1 = Integer.parseInt(second.split(" ")[0]);
-//                int second2 = Integer.parseInt(second.split(" ")[1]);
-//                if (first1 == first2 && second1 == second2) {
-//                    return Integer.compare(first1, second1);
-//                }
-//                int dif1 = Math.abs(first1 - second1);
-//                int dif2 = Math.abs(first2 - second2);
-//                if (dif1 == dif2)
-//                    return Integer.compare(dif1, dif2);
-//                return first.hashCode() - second.hashCode();
-//            }));
-//    }
 
     /**
      * Return lineNumber of last element in list
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public static int getToOffset(List<? extends PsiElement> psiElements) {
+    private static int getToOffset(List<? extends PsiElement> psiElements) {
         int toOffset;
         PsiElement lastChild;
         if (psiElements.size() == 1) {
@@ -197,17 +158,13 @@ public class MainHighlighter {
         return toOffset;
     }
 
-//    public Map<String, Map<String, RangeHighlighter>> getHighlighters() {
-//        return highlighters;
-//    }
-
     /**
      * Returns last child of given element, recursive
      *
      * @param element element ot get last child from
      * @return last child of element, or element if if has no children
      */
-    public static PsiElement getLastChild(PsiElement element) {
+    private static PsiElement getLastChild(PsiElement element) {
         if (element.getChildren().length == 0) return element;
         else return getLastChild(element.getLastChild());
     }
@@ -217,7 +174,7 @@ public class MainHighlighter {
      *
      * @param psiElements list of PsiElement to check for children
      */
-    public static int getFromOffset(List<? extends PsiElement> psiElements) {
+    private static int getFromOffset(List<? extends PsiElement> psiElements) {
         int fromOffset;
         if (psiElements.size() == 1) {
             if (psiElements.get(0).getChildren().length != 0) {
@@ -234,10 +191,4 @@ public class MainHighlighter {
         }
         return fromOffset;
     }
-
-//    public List<RangeHighlighter> getHighlightersByEditor(Editor editor) {
-//        Map<String, RangeHighlighter> x = highlighters.get(editor.getMarkupModel().toString());
-//        if (x == null) return null;
-//        return new ArrayList<>(x.values());
-//    }
 }
