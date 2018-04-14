@@ -10,7 +10,7 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.util.IncorrectOperationException;
 import edu.fiit.schneider_plugin.action.FindComments;
 import edu.fiit.schneider_plugin.comment_util.Extractor;
-import edu.fiit.schneider_plugin.entity.WarningType;
+import edu.fiit.schneider_plugin.entity.enums.WarningType;
 import edu.fiit.schneider_plugin.highlighters.MainHighlighter;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;

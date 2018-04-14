@@ -1,7 +1,7 @@
 package edu.fiit.schneider_plugin.comment_util;
 
 import com.intellij.psi.*;
-import edu.fiit.schneider_plugin.entity.SpecialStatementType;
+import edu.fiit.schneider_plugin.entity.enums.SpecialStatementType;
 
 import java.util.ArrayList;
 import java.util.Arrays;

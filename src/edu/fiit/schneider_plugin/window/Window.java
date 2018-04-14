@@ -9,8 +9,6 @@ public class Window implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        CommentFixerFormMenu menu = new CommentFixerFormMenu();
         toolWindow.getComponent().add(new CommentFixerFormMenu().getPanel1());
-        //toolWindow.getComponent().add()
     }
 }

@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * Class will be used only on comments that are targetting declaration of variable, method implementation or class declaration
  */
-@SuppressWarnings({"unused", "FieldCanBeLocal", "Duplicates"})
+@SuppressWarnings({"FieldCanBeLocal"})
 public class CommentTarget {
     @SuppressWarnings("WeakerAccess")
     public final static int COHORENCE_CONSTANT = 2;
@@ -32,7 +32,7 @@ public class CommentTarget {
     private String currentString;//This is variable holding actual string of variable name. It will become longer
                                  // after it is appended with modifierList words like private static and so on
     private float coherenceCoeficient;
-    public final static String[] STOP_WORDS = {"the","a","an"};//SPECIAL should add more in future, list from net might not be so good as we might think
+
     public CommentTarget(List<PsiComment> comments, List<PsiElement> targets, int result) {
         //Prechadzaj komentare a vytvor string z ich slov
         // prechadzaj targety a ked najdes metodu alebo triedu alebo variable tak vytvor z nich slova
@@ -41,7 +41,6 @@ public class CommentTarget {
             builder.append(comment.getText());
         }
         this.mergedComment = builder.toString();
-        //this.trimmedComment = trim();
         builder.setLength(0);
         if(result == 1)
             getClassText(targets);
@@ -88,16 +87,9 @@ public class CommentTarget {
         this.coherenceCoeficient = (float) wordSimilarityCounter / (float) lematisedLength;
     }
 
-    //trim
-    private String trim() {
-        return mergedComment.replace("[\n\t<>{}]"," ");
-    }
-
     private void getClassText(List<PsiElement> targets) {
         PsiElement main=null;
-        PsiElement help;
         StringBuilder builder = new StringBuilder();
-        String className;
         for(PsiElement actual: targets) {
             if (actual.getClass() == PsiClassImpl.class) {
                 main = actual;
@@ -127,9 +119,7 @@ public class CommentTarget {
         //PsiIdentifier - meno
         //Argumenty asi zatial nebudem pridavat
         PsiElement main=null;
-        PsiElement help;
         StringBuilder builder = new StringBuilder();
-        String methodName;
 
         for(PsiElement actual: targets) {
             if (actual.getClass() == PsiMethodImpl.class) {
@@ -157,9 +147,7 @@ public class CommentTarget {
 
     private void getVariableText(List<PsiElement> targets) {
         PsiElement main=targets.get(0).getParent();
-        PsiElement help;
         StringBuilder builder = new StringBuilder();
-        String methodName;
         PsiElement[] array= main.getChildren();
         PsiElement[] newArray = null;
         for (PsiElement element : array) {
@@ -208,35 +196,9 @@ public class CommentTarget {
     }
 
     //------------------------GETTERS------------------------
-    public String getMergedComment() {
-        return mergedComment;
-    }
 
-//    public String getTrimmedComment() {
-//        return trimmedComment;
-//    }
 
-    public List<String> getCommentWordList() {
-        return commentWordList;
-    }
-
-    public List<String> getModifierList() {
-        return modifierList;
-    }
-
-    public List<String> getTargetWordList() {
-        return targetWordList;
-    }
-
-    public String getCurrentString() {
-        return currentString;
-    }
-
-    public float getCoherenceCoeficient() {
+    public float getCoherenceCoefficient() {
         return coherenceCoeficient;
-    }
-
-    public void setLematisedList(List<String> lematisedList) {
-        this.lematisedList = lematisedList;
     }
 }
