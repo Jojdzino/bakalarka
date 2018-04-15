@@ -34,10 +34,12 @@ public class Analyser {
         for (PsiElement element : psiElements) {
             if (element instanceof PsiLambdaExpression)
                 return SpecialStatementType.LAMBDA;
-            if (element instanceof PsiForStatement || element instanceof PsiForeachStatement)
-                return SpecialStatementType.FOR;
+            if (element instanceof PsiForStatement || element instanceof PsiForeachStatement
+                    || element instanceof PsiWhileStatement)
+                return SpecialStatementType.CYCLE;
             if (element instanceof PsiAnonymousClass)
                 return SpecialStatementType.ANONYMOUS;
+
         }
         return null;
     }

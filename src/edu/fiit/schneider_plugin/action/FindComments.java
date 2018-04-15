@@ -28,7 +28,7 @@ public class FindComments extends AnAction {
 
     private static List<List<PsiComment>> highlightedComments = new ArrayList<>();
     @SuppressWarnings("FieldCanBeLocal")
-    private final int WORD_COUNT_COEFFICIENT = 3;
+    private final int WORD_COUNT_COEFFICIENT = 5;
 
     @SuppressWarnings("WeakerAccess")
     public static List<PsiComment> removeList(PsiElement element) {
@@ -114,7 +114,7 @@ public class FindComments extends AnAction {
                 highlightedComments.add(qualityComments.get(i));
             }
         }
-        int statementsBountTogether = ConfigAccesser.getElement("max_statement_bound_together");
+        int statementsBoundTogether = ConfigAccesser.getElement("max_statement_bound_together");
         //boolean noTarget = false;
         int commentWordCount;
         int statementCount;
@@ -134,7 +134,7 @@ public class FindComments extends AnAction {
                 commentWordCount = Analyser.countWords(quantityComments.get(i));
                 statementCount = Analyser.countStatements(quantityTargets.get(i));
                 specialStatement = Analyser.specialStatement(quantityTargets.get(i));
-                if ((commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBountTogether) ||
+                if ((commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBoundTogether) ||
                         specialStatement != null) {
                     MainHighlighter.highlight(quantityComments.get(i),
                             "Comment describes complex block, should be extracted", 1, WarningType.WARNING);

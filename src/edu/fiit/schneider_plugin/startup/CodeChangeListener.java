@@ -3,6 +3,7 @@ package edu.fiit.schneider_plugin.startup;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.intellij.psi.PsiTreeChangeEvent;
@@ -35,9 +36,13 @@ public class CodeChangeListener implements PsiTreeChangeListener {
             }
         }
         //update table
-        ToolWindowManagerImpl.getInstance(ProjectManager.getInstance().getOpenProjects()[0]).
-                getToolWindow("Tabbed pane").getComponent().getComponents()[1].
-                getComponentAt(5, 6).getListeners(ChangeListener.class)[0].stateChanged(new ChangeEvent(selectedEditor));
+        Project project = ProjectManager.getInstance().getOpenProjects()[0];
+        if (ToolWindowManagerImpl.getInstance(project).
+                getToolWindow("Tabbed pane") != null)
+            ToolWindowManagerImpl.getInstance(project).
+                    getToolWindow("Tabbed pane").getComponent().getComponents()[1].
+                    getComponentAt(5, 6).getListeners(ChangeListener.class)[0].
+                    stateChanged(new ChangeEvent(selectedEditor));//this one of ways to call remote method
     }
 
     private static List<RangeHighlighter> getFromLayer(List<RangeHighlighter> rangeHighlighters) {

@@ -37,7 +37,7 @@ public class CommentFixerFormMenu {
     }
 
     //sets current variable of comment length to user input and saves it into file
-    public CommentFixerFormMenu() {
+    CommentFixerFormMenu() {
         addConfigListeners();
         initJTable();
         tabbedPane1.addMouseListener(new MouseAdapter() {
@@ -103,7 +103,7 @@ public class CommentFixerFormMenu {
         });
     }
 
-    public JPanel getPanel1() {
+    JPanel getPanel1() {
         return panel;
     }
 }

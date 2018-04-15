@@ -1,13 +1,6 @@
 package edu.fiit.schneider_plugin.comment_util;
 
-import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaToken;
-import com.intellij.psi.PsiWhiteSpace;
-import com.intellij.psi.impl.source.tree.PsiCommentImpl;
-import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
-import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
-import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl;
+import com.intellij.psi.*;
 
 import java.util.List;
 
@@ -26,9 +19,9 @@ public class Checker {
         PsiElement actualElement = root.getNextSibling();
 
         while (actualElement != null) {
-            if (actualElement.getClass() == PsiCommentImpl.class && actualElement == psiComment)
+            if (actualElement instanceof PsiComment && actualElement == psiComment)
                 return true;
-            if (actualElement.getClass() != PsiCommentImpl.class && actualElement.getClass() != PsiWhiteSpaceImpl.class)
+            if (!(actualElement instanceof PsiComment) && actualElement instanceof PsiWhiteSpace)
                 return false;
             actualElement = actualElement.getNextSibling();
         }
@@ -55,14 +48,14 @@ public class Checker {
 
             // Special cases - if there is a declaration of variable ; is not closest prevSibling
             // ( declaration of variable but ; is in new line)
-            if (prevSibling.getClass() == PsiLocalVariableImpl.class)
+            if (prevSibling instanceof PsiLocalVariable)
                 return true;
 
             //Normal cases
-            if (prevSibling.getClass() == PsiWhiteSpaceImpl.class && prevSibling.getText().contains("\n"))
+            if (prevSibling instanceof PsiWhiteSpace && prevSibling.getText().contains("\n"))
                 newLine = true;
 
-            if (prevSibling.getClass() == PsiJavaTokenImpl.class && prevSibling.toString().endsWith("SEMICOLON"))
+            if (prevSibling instanceof PsiJavaToken && prevSibling.toString().endsWith("SEMICOLON"))
                 semicolonInSameLine = true;
 
             prevSibling = prevSibling.getPrevSibling();

@@ -1,17 +1,7 @@
 package edu.fiit.schneider_plugin.comment_util;
 
-import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.impl.source.PsiClassImpl;
-import com.intellij.psi.impl.source.PsiFieldImpl;
-import com.intellij.psi.impl.source.PsiJavaFileImpl;
-import com.intellij.psi.impl.source.PsiMethodImpl;
-import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
-import com.intellij.psi.impl.source.tree.java.PsiForStatementImpl;
-import com.intellij.psi.impl.source.tree.java.PsiForeachStatementImpl;
-import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
-import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl;
+
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import edu.fiit.schneider_plugin.config.ConfigAccesser;
 
@@ -38,18 +28,6 @@ public class Extractor {
         return allComments;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static PsiElement extractLastElement(PsiElement root){
-        PsiElement actualElement = root;
-
-        while(actualElement.getNextSibling()!=null){
-            actualElement=actualElement.getNextSibling();
-        }
-        if(actualElement.getChildren().length!=0)
-            return extractLastElement(actualElement.getLastChild());
-        else return actualElement;
-    }
-
     /**
      * Extracts target for list of comments.
      * @param psiComment last from list of comments to start looking from
@@ -65,41 +43,38 @@ public class Extractor {
         PsiElement actualElement = psiComment.getNextSibling();
         List<PsiElement> targetElements = new ArrayList<>();
 
-        //TODO mozno nie pre triedu, lebo to mi oznaci celu classu
-        //If comment describes method implementation
-        //If comment describes class declaration
-        if(psiComment.getParent().getClass()== PsiMethodImpl.class ||
-                psiComment.getParent().getClass() ==PsiClassImpl.class) {
+
+        //Comment that describes class or method is always before its declaration, in PSI its always child of class or method
+        if (psiComment.getParent() instanceof PsiMethod || psiComment.getParent() instanceof PsiClass) {
             targetElements.add(psiComment.getParent());
             return targetElements;
         }
 
         //Sets variable to make program look for only one element - Class
-        //TODO this might be unstable check for various types of java file content
-        //TODO like multiple classes in one file and classes with annotations etc...
-        if(psiComment.getParent().getClass() == PsiJavaFileImpl.class){
+        if (psiComment.getParent() instanceof PsiFile)
             actualMaxStatementBoundTogether=1;
-        }
+
 
         while (realElementsCounter != actualMaxStatementBoundTogether) {
             if(actualElement==null)
                 break;
+
             //There is new line, but not before there was a token or another code
-            if (actualElement.getClass() == PsiWhiteSpaceImpl.class && actualElement.getText().matches(".*\n.*\n.*") &&
+            if (actualElement instanceof PsiWhiteSpace && actualElement.getText().matches(".*\n.*\n.*") &&
                     (realElementsCounter != 0 || tokenCounter != 0))
                 break;
 
-            if (actualElement.getClass() != PsiWhiteSpaceImpl.class && actualElement.getClass() != PsiJavaTokenImpl.class)
+            if (actualElement instanceof PsiWhiteSpace && !(actualElement instanceof PsiJavaToken))
                 realElementsCounter++;
 
-            if (actualElement.getClass() == PsiJavaTokenImpl.class)
+            if (actualElement instanceof PsiJavaToken)
                 tokenCounter++;
 
             targetElements.add(actualElement);
 
-            Class actualElementClass = actualElement.getClass();
-            //SPECIAL when targetting reaches for within counter it will  break - for is signifficant for code processing
-            if (actualElementClass == PsiForeachStatementImpl.class || actualElementClass == PsiForStatementImpl.class)
+            //When type of for is in targets -> break because for always does some action that ends with some result
+            if (actualElement instanceof PsiForeachStatement || actualElement instanceof PsiForStatement ||
+                    actualElement instanceof PsiWhileStatement)
                 break;
 
             actualElement = actualElement.getNextSibling();
@@ -136,11 +111,11 @@ public class Extractor {
     public static int targetSpecifier(List<PsiElement> targets) {
 
         for (PsiElement actual : targets) {
-            if (actual.getClass() == PsiClassImpl.class) return 1;
-            if (actual.getClass() == PsiMethodImpl.class) return 2;
-            if (actual.getClass() == PsiFieldImpl.class ||
-                    actual.getParent().getClass() == PsiFieldImpl.class) return 3;
-            if (actual.getClass() == PsiLocalVariableImpl.class)
+            if (actual instanceof PsiClass) return 1;
+            if (actual instanceof PsiMethod) return 2;
+            if (actual instanceof PsiField ||
+                    actual.getParent() instanceof PsiField) return 3;
+            if (actual instanceof PsiLocalVariable)
                 return 3;
         }
 
