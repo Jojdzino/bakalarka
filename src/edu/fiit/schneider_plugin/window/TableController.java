@@ -12,14 +12,12 @@ import java.util.*;
 import java.util.List;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
-public
-//nullPointerException in some cases, but that shouldnt be a problem
 class TableController {
 
     private static List<Editor> editorList = null;
     private static List<RangeHighlighter> rangeHighlighterList = null;//editors that
 
-    public void clearTable(JTable table) {
+    void clearTable(JTable table) {
         DefaultTableModel dm = (DefaultTableModel) table.getModel();
         int rowCount = dm.getRowCount();
         for (int i = rowCount - 1; i >= 0; i--) {
@@ -68,7 +66,7 @@ class TableController {
     }
 
     //1 -> editor string name, 2. -> row of error, 3. -> problem string, 4. -> color of highlighting (not in table)
-    public void updateTable(JTable table) {
+    void updateTable(JTable table) {
         int rowCounter = 0;
         //int rowActual=10;
         MyTableModel model = new MyTableModel(createColumnVector(), 0);
@@ -81,15 +79,16 @@ class TableController {
 
         for (Editor editor : editors) {
             List<RangeHighlighter> highlighters = getAllHighlightersFromMyLayer(editor);
-            if (highlighters == null) continue;
-            highlighters = onlyFromLayer(highlighters);
             if (highlighters.size() == 0) continue;
+            //highlighters = onlyFromLayer(highlighters);
+            //if (highlighters.size() == 0) continue;
+            highlighters.sort(Comparator.comparingInt(RangeMarker::getStartOffset));
             rangeHighlighterList.addAll(highlighters);
             highlighters.sort(Comparator.comparingInt(RangeMarker::getStartOffset));
             for (RangeHighlighter highlighter : highlighters) {
                 List<Object> row = new ArrayList<>();
                 row.add(parseEditorName(editor.getDocument().toString()));
-                row.add(editor.getDocument().getLineNumber(highlighter.getStartOffset()));
+                row.add(1 + editor.getDocument().getLineNumber(highlighter.getStartOffset()));
                 row.add(highlighter.getErrorStripeTooltip());
                 row.add(highlighter.getTextAttributes().getBackgroundColor());
                 tableContent.add(row);

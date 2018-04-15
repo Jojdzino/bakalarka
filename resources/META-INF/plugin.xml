@@ -64,8 +64,11 @@
             <action id="Run CommentFixer" class="edu.fiit.schneider_plugin.action.FindComments"
                     text="Find faulty comments"
                     description="Run Comment Fixer" icon="/edu/fiit/schneider_plugin/icons/fix_icon.png"/>
-            <action id="Clear all targets" class="edu.fiit.schneider_plugin.action.ClearTargets"
-                    text="Clear all highlighting"
+            <action id="Clear single editor" class="edu.fiit.schneider_plugin.action.ClearSingleEditor"
+                    text="Clear editor"
+                    description="Clears all text of highlightin" icon="/edu/fiit/schneider_plugin/icons/fix_icon.png"/>
+            <action id="Clear all editors" class="edu.fiit.schneider_plugin.action.ClearAllEditors"
+                    text="Clear all editors"
                     description="Clears all text of highlightin" icon="/edu/fiit/schneider_plugin/icons/fix_icon.png"/>
         </group>
     </actions>

@@ -24,7 +24,6 @@ public class Extractor {
 
         List<PsiComment> allComments;
         allComments = Transformer.turnToList(Transformer.flatten(psiFileNodesCollections));
-        System.out.println();
         return allComments;
     }
 

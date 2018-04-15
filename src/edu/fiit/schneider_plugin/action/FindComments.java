@@ -63,6 +63,9 @@ public class FindComments extends AnAction {
     @SuppressWarnings("UnusedAssignment")
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
+        //clears highlights from this editor and clears table to be filled with actual highlights later
+        new ClearSingleEditor().actionPerformed(anActionEvent);
+        CodeChangeListener.updateTable();
 
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         Editor editor = anActionEvent.getRequiredData(CommonDataKeys.EDITOR);

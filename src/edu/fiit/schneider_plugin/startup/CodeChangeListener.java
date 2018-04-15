@@ -1,6 +1,7 @@
 package edu.fiit.schneider_plugin.startup;
 
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -12,10 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class CodeChangeListener implements PsiTreeChangeListener {
 
@@ -26,6 +24,7 @@ public class CodeChangeListener implements PsiTreeChangeListener {
         Editor selectedEditor = FileEditorManager.getInstance(ProjectManager.getInstance().getOpenProjects()[0]).getSelectedTextEditor();
         assert selectedEditor != null;
         List<RangeHighlighter> arr = getFromLayer(Arrays.asList(selectedEditor.getMarkupModel().getAllHighlighters()));
+        arr.sort(Comparator.comparingInt(RangeMarker::getStartOffset));
 
         Iterator<RangeHighlighter> iterator = arr.iterator();
         while (iterator.hasNext()) {
@@ -39,10 +38,14 @@ public class CodeChangeListener implements PsiTreeChangeListener {
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         if (ToolWindowManagerImpl.getInstance(project).
                 getToolWindow("Tabbed pane") != null)
-            ToolWindowManagerImpl.getInstance(project).
-                    getToolWindow("Tabbed pane").getComponent().getComponents()[1].
-                    getComponentAt(5, 6).getListeners(ChangeListener.class)[0].
-                    stateChanged(new ChangeEvent(selectedEditor));//this one of ways to call remote method
+            ToolWindowManagerImpl.
+                    getInstance(project).
+                    getToolWindow("Tabbed pane").
+                    getComponent().
+                    getComponents()[1].
+                    getComponentAt(0, 0).
+                    getListeners(ChangeListener.class)[0].
+                    stateChanged(new ChangeEvent(selectedEditor));//mindblowing way to call controller method
     }
 
     private static List<RangeHighlighter> getFromLayer(List<RangeHighlighter> rangeHighlighters) {
