@@ -73,15 +73,12 @@ class TableController {
         table.setModel(model);
         editorList = new ArrayList<>();
         rangeHighlighterList = new ArrayList<>();
-        //editorList.add(null);//null is editor for first row
         List<List<Object>> tableContent = new ArrayList<>();
         Editor[] editors = EditorFactory.getInstance().getAllEditors();
 
         for (Editor editor : editors) {
             List<RangeHighlighter> highlighters = getAllHighlightersFromMyLayer(editor);
             if (highlighters.size() == 0) continue;
-            //highlighters = onlyFromLayer(highlighters);
-            //if (highlighters.size() == 0) continue;
             highlighters.sort(Comparator.comparingInt(RangeMarker::getStartOffset));
             rangeHighlighterList.addAll(highlighters);
             highlighters.sort(Comparator.comparingInt(RangeMarker::getStartOffset));

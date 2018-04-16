@@ -30,7 +30,6 @@ public class FindComments extends AnAction {
     @SuppressWarnings("FieldCanBeLocal")
     private final int WORD_COUNT_COEFFICIENT = 5;
 
-    @SuppressWarnings("WeakerAccess")
     public static List<PsiComment> removeList(PsiElement element) {
         int i, j;
         boolean abort = false;
@@ -60,7 +59,6 @@ public class FindComments extends AnAction {
         highlightedComments.clear();
     }
 
-    @SuppressWarnings("UnusedAssignment")
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
         //clears highlights from this editor and clears table to be filled with actual highlights later
@@ -104,8 +102,8 @@ public class FindComments extends AnAction {
         }
 
         //---------------------SPECIFICATION COMPLETED------------------------ -> HIGHLIGHTING OF COMMENTS
+        //1. qualitative comment <-> target pairs with coherence highlighting
         for (int i = 0; i < pair.size(); i++) {
-            //if(i<=0)continue;
             if (pair.get(i).getCoherenceCoefficient() > 0.5) {
                 MainHighlighter.highlight(qualityComments.get(i),
                         "High coherence with comment", 0, WarningType.ERROR);
@@ -117,11 +115,12 @@ public class FindComments extends AnAction {
                 highlightedComments.add(qualityComments.get(i));
             }
         }
+
+        //2. quantitative comments <-> comments that target many statements
         int statementsBoundTogether = ConfigAccesser.getElement("max_statement_bound_together");
-        //boolean noTarget = false;
         int commentWordCount;
         int statementCount;
-        SpecialStatementType specialStatement;// statements like for, lambda, anonymous class
+        SpecialStatementType specialStatement;// statements like for, lambda, anonymous class that put comment at special position/place
         for (int i = 0; i < quantityComments.size(); i++) {
             if (Checker.checkIfCommentedOutCode(quantityComments.get(i))) {
                 MainHighlighter.highlight(quantityComments.get(i),
@@ -132,6 +131,7 @@ public class FindComments extends AnAction {
             else if (Checker.checkIfNoTarget(quantityTargets.get(i))) {
                 MainHighlighter.highlight(quantityComments.get(i),
                         "Comment has no target", 2, WarningType.ERROR);
+
                 highlightedComments.add(quantityComments.get(i));
             } else {
                 commentWordCount = Analyser.countWords(quantityComments.get(i));
@@ -140,11 +140,13 @@ public class FindComments extends AnAction {
                 if ((commentWordCount <= WORD_COUNT_COEFFICIENT && statementCount >= statementsBoundTogether) ||
                         specialStatement != null) {
                     MainHighlighter.highlight(quantityComments.get(i),
-                            "Comment describes complex block, should be extracted", 1, WarningType.WARNING);
+                            "Comment describes complex block, should be extracted",
+                            1, WarningType.WARNING);
+
                     highlightedComments.add(quantityComments.get(i));
                 }
             }
         }
-        CodeChangeListener.updateTable();//update table if there was change
+        CodeChangeListener.updateTable();
     }
 }

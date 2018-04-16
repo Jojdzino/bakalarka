@@ -90,19 +90,6 @@ public class Extractor {
         return codeElements;
      }
 
-    // Treats to special cases like for() \n;//comment
-    private static List<PsiElement> extractSpecialTarget(List<PsiElement> codeElements, PsiComment psiComment) {
-        PsiElement parentsParent = psiComment.getParent().getParent();
-        List<PsiElement> returnList = new ArrayList<>();
-
-        //extractien except last one, because it contains psiComment and elements that are already in codeElements
-        returnList.addAll(Arrays.asList(parentsParent.getChildren()).subList(0, parentsParent.getChildren().length - 2));
-
-        returnList.addAll(codeElements);
-
-        return returnList;
-    }
-
     /**
      * Identifies target based on list of targets
      * @return -1 if target is quantity, 1 for class, 2 for method, 3 for variable

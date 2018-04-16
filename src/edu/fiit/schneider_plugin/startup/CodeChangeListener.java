@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.intellij.psi.PsiTreeChangeEvent;
 import com.intellij.psi.PsiTreeChangeListener;
@@ -34,18 +35,14 @@ public class CodeChangeListener implements PsiTreeChangeListener {
                 iterator.remove();
             }
         }
+
         //update table
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
-        if (ToolWindowManagerImpl.getInstance(project).
-                getToolWindow("Tabbed pane") != null)
-            ToolWindowManagerImpl.
-                    getInstance(project).
-                    getToolWindow("Tabbed pane").
-                    getComponent().
-                    getComponents()[1].
-                    getComponentAt(0, 0).
-                    getListeners(ChangeListener.class)[0].
-                    stateChanged(new ChangeEvent(selectedEditor));//mindblowing way to call controller method
+        //correcting null pointer exceptions when there are no components
+        ToolWindow tabbedPane = ToolWindowManagerImpl.getInstance(project).getToolWindow("Tabbed pane");
+        if (tabbedPane != null && tabbedPane.getComponent().getComponents().length > 1)
+            tabbedPane.getComponent().getComponents()[1].getComponentAt(0, 0).
+                    getListeners(ChangeListener.class)[0].stateChanged(new ChangeEvent(selectedEditor));
     }
 
     private static List<RangeHighlighter> getFromLayer(List<RangeHighlighter> rangeHighlighters) {

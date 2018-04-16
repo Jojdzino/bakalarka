@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.Editor;
 import edu.fiit.schneider_plugin.highlighters.HighlightingClearer;
 import edu.fiit.schneider_plugin.startup.CodeChangeListener;
 
-//clears target
+//clears target and updates table
 public class ClearSingleEditor extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
